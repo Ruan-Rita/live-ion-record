@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Minha Extensão</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 10px; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Olá Mundo!</h1>
+  <button id="action-btn">Clique Aqui</button>
+  <script src="popup.js"></script>
+</body>
+<script>
+document.getElementById("action-btn").addEventListener("click", () => {
+  console.log("Botão clicado!");
+  alert("Você clicou no botão!");
+});
+</script>
+</html>
