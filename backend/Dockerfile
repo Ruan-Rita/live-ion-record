@@ -9,14 +9,15 @@ ENV NODE_ENV=production
 RUN apk add --no-cache curl
 RUN apk add --no-cache nodejs npm
 
+RUN npm install -g @nestjs/cli
+
 # Set working directory
-# WORKDIR /usr/temp
 WORKDIR /app
 
 # Copy package.json and install dependencies
 COPY package.json ./
 
-RUN npm install --production
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -25,4 +26,4 @@ COPY . .
 EXPOSE 3001
 
 # Command to run the application
-CMD ["npm", "run", "start:nodemon"]
+CMD ["npm", "run", "start:dev"]
