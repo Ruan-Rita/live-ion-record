@@ -19,20 +19,21 @@ services:
     volumes:
       - database_data:/var/lib/postgresql/data
     ports:
-    - "5432:5432"
-  
+      - "5432:5432"
+
   db_test:
     image: postgres:17
-    container_name: DATABASE
+    container_name: DATABASE_TEST
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test_password
       POSTGRES_DB: ion-record
     volumes:
-      - database_data:/var/lib/postgresql/data
+      - database_test_data:/var/lib/postgresql/data
     ports:
-    - "5433:5432"
+      - "5433:5432"
 
 volumes:
   database_data:
+  database_test_data:
   # api_data:
