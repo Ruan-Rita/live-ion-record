@@ -4,16 +4,20 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { HashService } from 'src/auth/hash.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly hashService: HashService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const user = this.usersRepository.create(createUserDto);
+    const password = await this.hashService.hash(createUserDto.password);
+    const user = this.usersRepository.create({ ...createUserDto, password });
+
     return this.usersRepository.save(user);
   }
 

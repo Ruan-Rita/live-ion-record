@@ -8,9 +8,11 @@ import { UserModule } from 'src/user/user.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { RecordModule } from 'src/record/record.module';
 import { SigninAuthDto } from 'src/auth/dto/signin-auth.dto';
+import { HashService } from 'src/auth/hash.service';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
+  let hashService: HashService;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -32,9 +34,11 @@ describe('AppController (e2e)', () => {
         AuthModule,
         RecordModule,
       ],
+      providers: [HashService],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    hashService = moduleFixture.get<HashService>(HashService);
     await app.init();
   });
 
@@ -52,7 +56,13 @@ describe('AppController (e2e)', () => {
           .send(userData)
           .expect(201);
 
-        expect(result.body).toMatchObject(userData);
+        expect(result.body).toMatchObject({
+          name: userData.name,
+          email: userData.email,
+        });
+        expect(
+          hashService.compare(userData.password, result.body.password),
+        ).toBeTruthy();
       });
     });
   });
@@ -66,11 +76,14 @@ describe('AppController (e2e)', () => {
           password: 'password',
         };
 
-        await request(app.getHttpServer()).post('/user').send(userData);
+        const response = await request(app.getHttpServer())
+          .post('/user')
+          .send(userData);
+        const { password } = response.body;
 
         const login: SigninAuthDto = {
           email: 'ruan@gmail.com',
-          password: 'password',
+          password,
         };
 
         const result = await request(app.getHttpServer())
