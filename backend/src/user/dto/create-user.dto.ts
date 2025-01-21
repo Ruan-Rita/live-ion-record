@@ -13,4 +13,9 @@ export class CreateUserDto {
   @Max(72)
   @Min(6)
   password: string;
+
+  constructor(partial: Partial<CreateUserDto>) {
+    Object.assign(this, partial);
+    console.log('DTO Data:', this, partial);
+  }
 }

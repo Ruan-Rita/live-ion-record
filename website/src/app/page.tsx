@@ -10,9 +10,9 @@ export default function LandingPage() {
         <nav className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Video className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">VideoMaster</span>
+            <span className="text-xl font-bold">Iion</span>
           </div>
-          <Button asChild>
+          <Button asChild className="bg-emerald-700">
             <Link href="#get-started">Get Started</Link>
           </Button>
         </nav>
@@ -33,9 +33,15 @@ export default function LandingPage() {
               <Chrome className="ml-2 h-5 w-5" />
             </Link>
           </Button>
+          <Button className="ml-4 bg-emerald-700" size="lg" asChild>
+            <Link href="/auth/login">
+              Acessar painel
+              <Chrome className="ml-2 h-5 w-5" />
+            </Link>
+          </Button>
         </section>
 
-        <section className="bg-muted py-12">
+        <section className="bg-muted py-12 bg-emerald-300">
           <div className="container mx-auto px-4">
             <h2 className="mb-8 text-center text-3xl font-bold">
               Key Features
@@ -91,8 +97,8 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="bg-muted py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+      <footer className="bg-muted py-6 bg-emerald-700">
+        <div className="container mx-auto px-4 text-center text-slate-100 text-sm text-muted-foreground">
           © 2023 VideoMaster. All rights reserved.
         </div>
       </footer>

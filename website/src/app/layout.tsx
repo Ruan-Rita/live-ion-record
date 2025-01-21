@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 // import { Average } from "next/font/google";
 import './globals.css';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { CompSidebar } from '@/components/sidebar/sidebar';
 
 export const metadata: Metadata = {
   title: '',
