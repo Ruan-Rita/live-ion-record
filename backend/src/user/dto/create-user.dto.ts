@@ -1,21 +1,16 @@
-import { IsEmail, IsString, Max, Min } from 'class-validator';
+import { IsEmail, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
-  @Min(3)
+  @MinLength(3)
   name: string;
 
   @IsEmail()
-  @Max(48)
+  @MaxLength(48)
   email: string;
 
   @IsString()
-  @Max(72)
-  @Min(6)
+  @MaxLength(72)
+  @MinLength(6)
   password: string;
-
-  constructor(partial: Partial<CreateUserDto>) {
-    Object.assign(this, partial);
-    console.log('DTO Data:', this, partial);
-  }
 }

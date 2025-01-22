@@ -18,7 +18,12 @@ export class UserService {
     const password = await this.hashService.hash(createUserDto.password);
     const user = this.usersRepository.create({ ...createUserDto, password });
 
-    return this.usersRepository.save(user);
+    const newUser = await this.usersRepository.save(user);
+    
+    return {
+      message: 'User created successfully',
+      data: newUser,
+    }
   }
 
   findOne(id: number) {
