@@ -8,23 +8,45 @@ import { Label } from '@/components/ui/label';
 import { FormEvent, useState } from 'react';
 import { signUpApi } from '@/api/auth';
 import { SignUpApiData } from '@/api/types/api.types';
+import { redirect } from 'next/navigation';
+import { useForm, SubmitHandler } from "react-hook-form"
 
 export default function Register() {
-  const [formData, setFormData] = useState<SignUpApiData>({
-    email: 'ruan@mail.com',
-    password: '213213',
-    name: 'ruan'
-  });
-  
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<SignUpApiData>();
 
-  async function sendForm(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function indentifierErrorFieldApi(messages: string[]) {
+    console.log(messages);
+    const errors: any = {};
     
-    await signUpApi(formData);
+    messages.forEach(message => {
+      const firstWord = message.substring(0, message.indexOf(' ', 0))
+      errors[firstWord] = message; 
+    });
 
-    // setTimeout(() => {
-    //   redirect(`/auth/login`)
-    // }, 3000)
+    return errors;
+  }
+
+  async function sendForm(inputs: SignUpApiData) {
+    const data = await signUpApi(inputs);
+    
+    if (data.statusCode !== 201) {
+      // show error message default
+      const errorfields: SignUpApiData = indentifierErrorFieldApi(data.message);
+
+      (Object.keys(errorfields) as Array<keyof SignUpApiData>).forEach((key) => {
+        setError(key, {
+          message: errorfields[key],
+        })
+      });
+      return;      
+    }
+    // show success message
+    redirect(`/auth/login`)
   }
 
   return (
@@ -57,49 +79,37 @@ export default function Register() {
               </Link>
             </p>
           </div>
-          <form className="mt-8 space-y-6" onSubmit={e => sendForm(e)}>
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit(sendForm)}>
             <div className="space-y-4 rounded-md shadow-sm">
               <div>
                 <Label htmlFor="name">Name</Label>
                 <Input
-                  id="name"
-                  name="name"
-                  type="text"
-                  value={formData.name}
-                  autoComplete="name"
-                  onChange={value => setFormData({...formData, name: value.target.value})}
-                  required
                   className="mt-1"
                   placeholder="Enter your name"
+                  {...register("name", {required: true})}
                 />
+               {errors.name && <span>{errors.name.message || 'This field is required'}</span>}
               </div>
               <div>
                 <Label htmlFor="email-address">Email address</Label>
                 <Input
-                  id="email-address"
-                  name="email"
-                  value={formData.email}
                   type="email"
-                  onChange={value => setFormData({...formData, email: value.target.value})}
                   autoComplete="email"
-                  required
                   className="mt-1"
                   placeholder="Enter your email"
+                  {...register("email", {required: true})}
                 />
+                {errors.email && <span>{errors.email.message || 'This field is required'}</span>}
               </div>
               <div>
                 <Label htmlFor="password">Password</Label>
                 <Input
-                  id="password"
-                  name="password"
-                  value={formData.password}
                   type="password"
-                  autoComplete="current-password"
-                  onChange={value => setFormData({...formData, password: value.target.value})}
-                  required
-                  className="mt-1"
+                  className="my-1"
                   placeholder="Enter your password"
+                  {...register("password", {required: true})}
                 />
+                {errors.password && <span>{errors.password.message || 'This field is required'}</span>}
               </div>
             </div>
 
