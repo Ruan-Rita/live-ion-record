@@ -14,16 +14,16 @@ export class UserService {
     private readonly hashService: HashService,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {    
+  async create(createUserDto: CreateUserDto) {
     const password = await this.hashService.hash(createUserDto.password);
     const user = this.usersRepository.create({ ...createUserDto, password });
 
     const newUser = await this.usersRepository.save(user);
-    
+
     return {
       message: 'User created successfully',
       data: newUser,
-    }
+    };
   }
 
   findOne(id: number) {

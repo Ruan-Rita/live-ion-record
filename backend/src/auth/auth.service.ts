@@ -11,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import jwtConfig from './config/jwt.config';
 import { ConfigType } from '@nestjs/config';
+import { HashService } from './hash.service';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,8 @@ export class AuthService {
     private userRepository: Repository<User>,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService,
+    private readonly hashService: HashService
   ) {}
 
   async signIn(signInDto: SigninAuthDto) {
@@ -28,11 +30,12 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UnauthorizedException('Credentials is invalid');
     }
+    const isValidPassword = await this.hashService.compare(signInDto.password, user.password);
 
-    if (user?.password !== signInDto.password) {
-      throw new UnauthorizedException();
+    if (! isValidPassword ) {
+      throw new UnauthorizedException('Credentials is invalid');
     }
 
     const payload = { sub: user.id, name: user.name, email: user.email };

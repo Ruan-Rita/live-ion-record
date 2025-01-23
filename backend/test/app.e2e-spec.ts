@@ -57,11 +57,15 @@ describe('AppController (e2e)', () => {
           .expect(201);
 
         expect(result.body).toMatchObject({
-          name: userData.name,
-          email: userData.email,
+          data: {
+            name: userData.name,
+            email: userData.email,
+          },
+          message: 'User created successfully',
         });
+
         expect(
-          hashService.compare(userData.password, result.body.password),
+          await hashService.compare(userData.password, result.body.data.password),
         ).toBeTruthy();
       });
     });
@@ -69,21 +73,21 @@ describe('AppController (e2e)', () => {
 
   describe('Auth Service', () => {
     describe('SignIn [POST]', () => {
-      it('sign in using user data', async () => {
+      it('should sign in using user credentials', async () => {
         const userData: CreateUserDto = {
           name: 'ruan rita',
           email: 'ruan@gmail.com',
           password: 'password',
         };
 
-        const response = await request(app.getHttpServer())
+        await request(app.getHttpServer())
           .post('/user')
-          .send(userData);
-        const { password } = response.body;
+          .send(userData)
+          .expect(201);
 
         const login: SigninAuthDto = {
-          email: 'ruan@gmail.com',
-          password,
+          email: userData.email,
+          password: userData.password,
         };
 
         const result = await request(app.getHttpServer())

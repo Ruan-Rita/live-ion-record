@@ -1,10 +1,32 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { signIn } from 'next-auth/react';
+import { LoginApiData } from '@/api/types/api.types';
+import ErrorForm from '@/components/error-form/error-form';
+import { useForm } from 'react-hook-form';
 
 export default function Login() {
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<LoginApiData>({
+    defaultValues: {
+      email: 'ruan@gmail.com',
+      password: '123456'
+    }
+  });
+
+  async function loginForm(inputs: LoginApiData) {
+    signIn('credentials', {redirect: false, ...inputs})
+  }
+
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
       {/* Image Side */}
@@ -35,31 +57,29 @@ export default function Login() {
               </Link>
             </p>
           </div>
-          <form className="mt-8 space-y-6" action="#" method="POST">
-            <div className="space-y-4 rounded-md shadow-sm">
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit(loginForm)}>
+            <div className="space-y-4 rounded-md">
               <div>
                 <Label htmlFor="email-address">Email address</Label>
                 <Input
-                  id="email-address"
-                  name="email"
+                  {...register('email', {required: true})}
                   type="email"
                   autoComplete="email"
-                  required
                   className="mt-1"
                   placeholder="Enter your email"
                 />
+                <ErrorForm errors={errors} nameField="email" />
               </div>
               <div>
                 <Label htmlFor="password">Password</Label>
                 <Input
-                  id="password"
-                  name="password"
+                  {...register('password', {required: true})}
                   type="password"
                   autoComplete="current-password"
-                  required
                   className="mt-1"
                   placeholder="Enter your password"
                 />
+                <ErrorForm errors={errors} nameField="password" />
               </div>
             </div>
 

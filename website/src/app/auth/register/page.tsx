@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FormEvent, useState } from 'react';
+import { useForm } from "react-hook-form";
 import { signUpApi } from '@/api/auth';
 import { SignUpApiData } from '@/api/types/api.types';
 import { redirect } from 'next/navigation';
-import { useForm, SubmitHandler } from "react-hook-form"
+import { toast } from 'react-toastify';
+import { indentifierErrorFieldApi } from '@/lib/utils';
+import ErrorForm from '@/components/error-form/error-form';
 
 export default function Register() {
   const {
@@ -19,32 +21,23 @@ export default function Register() {
     formState: { errors },
   } = useForm<SignUpApiData>();
 
-  function indentifierErrorFieldApi(messages: string[]) {
-    console.log(messages);
-    const errors: any = {};
-    
-    messages.forEach(message => {
-      const firstWord = message.substring(0, message.indexOf(' ', 0))
-      errors[firstWord] = message; 
-    });
-
-    return errors;
-  }
-
   async function sendForm(inputs: SignUpApiData) {
     const data = await signUpApi(inputs);
     
     if (data.statusCode !== 201) {
       // show error message default
+      toast.error('Valide os campos');
       const errorfields: SignUpApiData = indentifierErrorFieldApi(data.message);
-
+      
       (Object.keys(errorfields) as Array<keyof SignUpApiData>).forEach((key) => {
         setError(key, {
           message: errorfields[key],
         })
       });
+      
       return;      
     }
+    toast.success(data.message);
     // show success message
     redirect(`/auth/login`)
   }
@@ -80,26 +73,26 @@ export default function Register() {
             </p>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit(sendForm)}>
-            <div className="space-y-4 rounded-md shadow-sm">
+            <div className="space-y-4 rounded-md">
               <div>
                 <Label htmlFor="name">Name</Label>
                 <Input
-                  className="mt-1"
+                  className="my-1"
                   placeholder="Enter your name"
                   {...register("name", {required: true})}
                 />
-               {errors.name && <span>{errors.name.message || 'This field is required'}</span>}
+               <ErrorForm errors={errors} nameField="name" />
               </div>
               <div>
                 <Label htmlFor="email-address">Email address</Label>
                 <Input
                   type="email"
                   autoComplete="email"
-                  className="mt-1"
+                  className="my-1"
                   placeholder="Enter your email"
-                  {...register("email", {required: true})}
+                  {...register("email", {required: true})}  
                 />
-                {errors.email && <span>{errors.email.message || 'This field is required'}</span>}
+                <ErrorForm errors={errors} nameField="email" />
               </div>
               <div>
                 <Label htmlFor="password">Password</Label>
@@ -109,7 +102,7 @@ export default function Register() {
                   placeholder="Enter your password"
                   {...register("password", {required: true})}
                 />
-                {errors.password && <span>{errors.password.message || 'This field is required'}</span>}
+                <ErrorForm errors={errors} nameField="password" />
               </div>
             </div>
 
