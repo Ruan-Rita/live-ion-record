@@ -28,8 +28,8 @@ const handler = NextAuth({
           const result = await loginApi({email, password});
           // If no error and we have user data, return it
           if (result && result.statusCode == 201) {
-            const access_token = result.access_token; 
-            const user = await userBasicInfoApi(access_token);
+            const accessToken = result.accessToken; 
+            const user = await userBasicInfoApi(accessToken);
             return result
           }
   

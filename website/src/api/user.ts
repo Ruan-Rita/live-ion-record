@@ -1,7 +1,7 @@
 import axios from "axios";
-import { SignUpApiData } from "./types/api.types";
 import { API_URL } from "@/contants";
 import { getHeaderAxios } from "@/lib/utils";
+import { SignUpApiData } from "./types/api.types";
 
 export async function userBasicInfoApi(accessToken: string) {
     const response = await axios.post(`${API_URL}/user`, {}, getHeaderAxios(accessToken)).catch(error => {

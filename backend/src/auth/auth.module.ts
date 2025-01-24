@@ -7,10 +7,19 @@ import { JwtModule } from '@nestjs/jwt';
 import jwtConfig from './config/jwt.config';
 import { ConfigModule } from '@nestjs/config';
 import { HashService } from './hash.service';
+import { AuthGuard } from './auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, HashService],
+  providers: [
+    AuthService,
+    HashService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
   imports: [
     ConfigModule.forRoot({
       load: [jwtConfig],
@@ -18,6 +27,6 @@ import { HashService } from './hash.service';
     TypeOrmModule.forFeature([User]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
-  exports: [HashService],
+  exports: [HashService, ConfigModule, JwtModule],
 })
 export class AuthModule {}

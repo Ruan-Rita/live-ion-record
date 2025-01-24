@@ -14,6 +14,36 @@ describe('AppController (e2e)', () => {
   let app: INestApplication;
   let hashService: HashService;
 
+  const userData: CreateUserDto = {
+    name: 'ruan rita',
+    email: 'ruan@gmail.com',
+    password: 'password',
+  };
+
+  async function createUser() {
+    const result = await request(app.getHttpServer())
+      .post('/user')
+      .send(userData)
+      .expect(201);
+    
+    return result.body 
+  }
+
+  async function createUserAuthenticated() {
+    await createUser();
+    const login: SigninAuthDto = {
+      email: userData.email,
+      password: userData.password,
+    };
+
+    const result = await request(app.getHttpServer())
+      .post('/auth')
+      .send(login)
+      .expect(201);
+    
+    return result.body;
+  }
+
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
@@ -45,18 +75,9 @@ describe('AppController (e2e)', () => {
   describe('User CRUD', () => {
     describe('User [POST]', () => {
       it('should create a new user', async () => {
-        const userData: CreateUserDto = {
-          name: 'ruan rita',
-          email: 'ruan@gmail.com',
-          password: 'password',
-        };
+        const result = await createUser();
 
-        const result = await request(app.getHttpServer())
-          .post('/user')
-          .send(userData)
-          .expect(201);
-
-        expect(result.body).toMatchObject({
+        expect(result).toMatchObject({
           data: {
             name: userData.name,
             email: userData.email,
@@ -65,39 +86,32 @@ describe('AppController (e2e)', () => {
         });
 
         expect(
-          await hashService.compare(userData.password, result.body.data.password),
+          await hashService.compare(userData.password, result.data.password),
         ).toBeTruthy();
       });
     });
+    describe('User basic info', () => {
+      it('should take basic info about user logged', async () => {
+        const {accessToken} = await createUserAuthenticated();
+        const userInfo = await request(app.getHttpServer())
+          .get('/user/basic-info')
+          .set('Authorization', `Bearer ${accessToken}`)
+          .send()
+          .expect(200);
+
+        console.log('user body', userInfo.body);
+      })
+    })
   });
 
   describe('Auth Service', () => {
     describe('SignIn [POST]', () => {
       it('should sign in using user credentials', async () => {
-        const userData: CreateUserDto = {
-          name: 'ruan rita',
-          email: 'ruan@gmail.com',
-          password: 'password',
-        };
+        const result = await createUserAuthenticated()
 
-        await request(app.getHttpServer())
-          .post('/user')
-          .send(userData)
-          .expect(201);
-
-        const login: SigninAuthDto = {
-          email: userData.email,
-          password: userData.password,
-        };
-
-        const result = await request(app.getHttpServer())
-          .post('/auth')
-          .send(login)
-          .expect(201);
-
-        expect(result.body).toHaveProperty('access_token');
-        expect(typeof result.body.access_token).toBe('string');
-        expect(result.body.access_token).not.toBe('');
+        expect(result).toHaveProperty('accessToken');
+        expect(typeof result.accessToken).toBe('string');
+        expect(result.accessToken).not.toBe('');
       });
     });
   });

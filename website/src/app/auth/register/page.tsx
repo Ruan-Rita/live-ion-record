@@ -6,12 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from "react-hook-form";
-import { signUpApi } from '@/api/auth';
 import { SignUpApiData } from '@/api/types/api.types';
 import { redirect } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { indentifierErrorFieldApi } from '@/lib/utils';
 import ErrorForm from '@/components/error-form/error-form';
+import { signUpApi } from '@/api/user';
 
 export default function Register() {
   const {
@@ -60,7 +60,7 @@ export default function Register() {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-                Create a new account
+              Create a new account
             </h2>
             <p className="mt-2 text-sm text-gray-600">
               Or{' '}
