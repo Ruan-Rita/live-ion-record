@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { signIn, useSession } from 'next-auth/react';
-import { LoginApiData } from '@/api/types/api.types';
+import { LoginApiData } from '@/types/api.types';
 import ErrorForm from '@/components/error-form/error-form';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';

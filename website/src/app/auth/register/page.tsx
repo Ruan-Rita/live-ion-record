@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from "react-hook-form";
-import { SignUpApiData } from '@/api/types/api.types';
+import { SignUpApiData } from '@/types/api.types';
 import { redirect } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { indentifierErrorFieldApi } from '@/lib/utils';

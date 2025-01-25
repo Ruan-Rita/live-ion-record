@@ -5,7 +5,15 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   env: {
     API_URL: process.env.API_URL,
-  }
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

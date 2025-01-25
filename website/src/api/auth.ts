@@ -1,6 +1,6 @@
 import { API_URL, headerAxios } from "@/contants"
+import { LoginApiData } from "@/types/api.types";
 import axios from "axios"
-import { LoginApiData } from "./types/api.types";
 
 export const loginApi = async (income: LoginApiData) => {
   const response = await axios.post(`${API_URL}/auth`, JSON.stringify(income), headerAxios).catch(error => {
