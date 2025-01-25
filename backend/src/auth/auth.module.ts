@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { HashService } from './hash.service';
 import { AuthGuard } from './auth.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   controllers: [AuthController],
@@ -26,6 +27,7 @@ import { APP_GUARD } from '@nestjs/core';
     }),
     TypeOrmModule.forFeature([User]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    forwardRef(() => UserModule),
   ],
   exports: [HashService, ConfigModule, JwtModule],
 })

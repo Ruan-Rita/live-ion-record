@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { ConfigModule } from '@nestjs/config';
@@ -25,8 +25,8 @@ describe('AppController (e2e)', () => {
       .post('/user')
       .send(userData)
       .expect(201);
-    
-    return result.body 
+
+    return result.body;
   }
 
   async function createUserAuthenticated() {
@@ -40,7 +40,7 @@ describe('AppController (e2e)', () => {
       .post('/auth')
       .send(login)
       .expect(201);
-    
+
     return result.body;
   }
 
@@ -68,6 +68,15 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.enableCors();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true, // Converte automaticamente o payload para uma instância do DTO
+        whitelist: true, // Remove campos não declarados no DTO
+        forbidNonWhitelisted: true, // Rejeita payload com campos não permitidos
+        enableDebugMessages: true,
+      }),
+    );
     hashService = moduleFixture.get<HashService>(HashService);
     await app.init();
   });
@@ -92,22 +101,21 @@ describe('AppController (e2e)', () => {
     });
     describe('User basic info', () => {
       it('should take basic info about user logged', async () => {
-        const {accessToken} = await createUserAuthenticated();
+        const { accessToken } = await createUserAuthenticated();
+
         const userInfo = await request(app.getHttpServer())
           .get('/user/basic-info')
           .set('Authorization', `Bearer ${accessToken}`)
           .send()
           .expect(200);
-
-        console.log('user body', userInfo.body);
-      })
-    })
+      });
+    });
   });
 
   describe('Auth Service', () => {
     describe('SignIn [POST]', () => {
       it('should sign in using user credentials', async () => {
-        const result = await createUserAuthenticated()
+        const result = await createUserAuthenticated();
 
         expect(result).toHaveProperty('accessToken');
         expect(typeof result.accessToken).toBe('string');

@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
+import { signOut } from 'next-auth/react';
 
 export function CompSidebar() {
   return (
@@ -65,7 +66,7 @@ export function CompSidebar() {
         <Button
           variant="ghost"
           className="w-full justify-start"
-          onClick={() => console.log('Logout clicked')}
+          onClick={() => signOut()}
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Logout</span>

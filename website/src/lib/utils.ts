@@ -20,7 +20,7 @@ export function indentifierErrorFieldApi(messages: string[]) {
 export function getHeaderAxios(accessToken?: string) {
   const header = structuredClone(headerAxios)
   if (header?.headers) {
-    header.headers['Authorization'] = 'bearer '+accessToken;
+    header.headers['Authorization'] = 'Bearer '+accessToken;
   }
   return header;
 }

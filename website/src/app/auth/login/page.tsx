@@ -5,10 +5,13 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { LoginApiData } from '@/api/types/api.types';
 import ErrorForm from '@/components/error-form/error-form';
 import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
   const {
@@ -23,9 +26,25 @@ export default function Login() {
     }
   });
 
+  const router = useRouter()
   async function loginForm(inputs: LoginApiData) {
-    signIn('credentials', {redirect: false, ...inputs})
+    const response = await signIn('credentials', {redirect: false, ...inputs})
+    if (response?.status === 200) {
+      toast.success("Logged and redirecting . . .");
+      setTimeout(() => {
+        router.push('/library')
+      }, 2000)
+      return;
+    }
+    toast.error(response?.error || 'Something goes wrong!');
   }
+
+  const { data: session, status, update } = useSession()
+
+  useEffect(() => {
+    console.log('session', session);
+    console.log('status', status);
+  }, [])
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">

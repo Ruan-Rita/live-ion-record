@@ -12,11 +12,9 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
 import { AuthenticatedRequest } from 'src/auth/interface/authenticate-request.type';
 import { Public } from 'src/auth/constant';
 
-@UseGuards(AuthGuard)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -27,17 +25,10 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
-
-  @Get('/basic-info')
+  @Get('basic-info')
   basicInfo(@Req() request: AuthenticatedRequest) {
-    console.log(request, 'sads');
-
     const user = request.user;
-    return { name: 'gorge' };
+    return user;
   }
 
   @Patch(':id')
@@ -48,5 +39,10 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.userService.findOne(+id);
   }
 }
