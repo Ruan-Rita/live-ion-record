@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { RecordModule } from './record/record.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     UserModule,
     AuthModule,
     RecordModule,
+    StorageModule,
   ],
   providers: [],
 })
