@@ -43,7 +43,6 @@ export async function createUserAuthenticated(app: INestApplication) {
   return result.body;
 }
 
-// export
 export async function initTestingModule() {
   if (!global.testApp || !global.testModule) {
     const moduleFixture: TestingModule = await Test.createTestingModule({

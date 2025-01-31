@@ -23,6 +23,29 @@ export class RecordController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
+  async uploadRecordChunks(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('filename') filename: string,
+    @Body('index') index: string,
+  ) {
+    const fileFolder = filename;
+    const fileName = `${index}.webm`;
+
+    await this.storageService.temporary(file, {
+      fileName,
+      path: fileFolder,
+    });
+
+    return { success: true, message: 'Chunk uploaded successfully' };
+  }
+
+  @Post('complete')
+  async completeUpload(@Body('filename') filename: string) {
+    return await this.storageService.uploadStream(filename);
+  }
+
+  @Post()
+  @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     const fileUrl = await this.storageService.upload(file);
     return { url: fileUrl };
