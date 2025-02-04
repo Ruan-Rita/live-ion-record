@@ -32,6 +32,7 @@ import localStorageConfig from './config/local-storage.config';
       },
       inject: [storageConfig.KEY, awsBucketConfig.KEY, localStorageConfig.KEY],
     },
+    LocalStorageStrategy,
     StorageService,
   ],
   exports: [StorageService],

@@ -13,6 +13,7 @@ import { RecordService } from './record.service';
 import { UpdateRecordDto } from './dto/update-record.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { StorageService } from 'src/storage/storage.service';
+import { Public } from 'src/auth/constant';
 
 @Controller('record')
 export class RecordController {
@@ -21,15 +22,16 @@ export class RecordController {
     private readonly storageService: StorageService,
   ) {}
 
-  @Post()
-  @UseInterceptors(FileInterceptor('file'))
+  @Public()
+  @Post('/upload-chunks')
+  @UseInterceptors(FileInterceptor('chunk'))
   async uploadRecordChunks(
     @UploadedFile() file: Express.Multer.File,
     @Body('filename') filename: string,
     @Body('index') index: string,
   ) {
     const fileFolder = filename;
-    const fileName = `${index}.webm`;
+    const fileName = `chunk${index}.webm`;
 
     await this.storageService.temporary(file, {
       fileName,
@@ -39,6 +41,7 @@ export class RecordController {
     return { success: true, message: 'Chunk uploaded successfully' };
   }
 
+  @Public()
   @Post('complete')
   async completeUpload(@Body('filename') filename: string) {
     return await this.storageService.uploadStream(filename);

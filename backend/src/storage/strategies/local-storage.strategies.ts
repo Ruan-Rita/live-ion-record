@@ -29,7 +29,7 @@ export class LocalStorageStrategy implements StorageStrategy {
       await fs.mkdir(fullPath, { recursive: true });
 
       if (options.fileName) {
-        const isSlice = options.fileName.substring(0, 1);
+        const isSlice = options.fileName.substring(0, 1) === '/';
         customName = `${isSlice ? '' : '/'}${options.fileName}`;
       }
 
@@ -49,7 +49,7 @@ export class LocalStorageStrategy implements StorageStrategy {
     };
 
     if (options.path) {
-      const isSlice = options.path.substring(0, 1);
+      const isSlice = options.path.substring(0, 1) === '/';
       newOptions.path += `${isSlice ? '' : '/'}${options.path}`;
     }
 
@@ -62,7 +62,7 @@ export class LocalStorageStrategy implements StorageStrategy {
 
   async clearTemporary(path: string) {
     const temporaryPath = '/temporary';
-    const isSlice = path.substring(0, 1);
+    const isSlice = path.substring(0, 1) === '/';
     const finalPath = `${temporaryPath}${isSlice ? '' : '/'}${path}`;
 
     await fs.rm(finalPath, { recursive: true, force: true });

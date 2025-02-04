@@ -2,6 +2,8 @@ import { Injectable, Inject } from '@nestjs/common';
 import { StorageStrategy } from './interfaces/storage.interface';
 import { LocalStorageStrategy } from './strategies/local-storage.strategies';
 import { UploadOptions } from './interfaces/upload-options.interface';
+import * as fs from 'fs';
+import path from 'path';
 
 @Injectable()
 export class StorageService {
@@ -30,31 +32,53 @@ export class StorageService {
   }
 
   async uploadStream(fileName: string) {
-    // // Check if the temp directory exists
+    await this.clearTemporary(fileName);
 
-    // if (!fs.existsSync(tempDir/fileName)) {
-    //   return { success: false, message: 'No chunks found' };
-    // }
+    const temporaryDirectory = '/temporary';
+    const pathToFiles = temporaryDirectory + '/' + fileName;
+    const outputFile = fileName + '/' + fileName;
 
-    // // Read and concatenate all chunks in order
-    // const chunkFiles = fs
-    //   .readdirSync(tempDir)
-    //   .sort((a, b) => parseInt(a) - parseInt(b));
+    // Check if the temp directory exists
+    if (!fs.existsSync(pathToFiles)) {
+      return { success: false, message: 'No chunks found' };
+    }
 
-    // const writeStream = fs.createWriteStream(outputFile);
+    // Read and concatenate all chunks in order
+    const chunkFiles = fs
+      .readdirSync(pathToFiles)
+      .sort((a, b) => parseInt(a) - parseInt(b));
 
-    // for (const chunkFile of chunkFiles) {
-    //   const chunkPath = path.join(tempDir, chunkFile);
-    //   const chunkData = fs.readFileSync(chunkPath);
-    //   writeStream.write(chunkData);
-    // }
+    const writeStream = fs.createWriteStream(outputFile);
 
-    // writeStream.end();
+    for (const chunkFile of chunkFiles) {
+      const chunkPath = path.join(temporaryDirectory, chunkFile);
+      const chunkData = fs.readFileSync(chunkPath);
+      writeStream.write(chunkData);
+    }
 
-    // // Cleanup: Remove temporary chunks
-    // fs.rmSync(tempDir, { recursive: true, force: true });
-    const outputFile = await this.upload(Buffer.bind(132));
-    this.clearTemporary(fileName);
+    writeStream.end();
+
+    // Aguarda o writeStream finalizar antes de prosseguir
+    await new Promise((resolve) =>
+      writeStream.on('finish', () => {
+        resolve(true);
+      }),
+    );
+
+    // Criar um objeto semelhante ao Multer File
+    const fileBuffer = fs.readFileSync(outputFile);
+    const file: Express.Multer.File = {
+      fieldname: 'file',
+      originalname: fileName,
+      encoding: '7bit',
+      mimetype: 'application/octet-stream', // ou use algo mais específico
+      buffer: fileBuffer,
+      size: fileBuffer.length,
+    } as Express.Multer.File;
+
+    await this.upload(file); // Agora o objeto segue o formato correto
+
+    await this.clearTemporary(fileName);
 
     return {
       success: true,
