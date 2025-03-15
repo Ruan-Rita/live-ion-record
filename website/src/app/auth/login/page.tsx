@@ -41,11 +41,6 @@ export default function Login() {
 
   const { data: session, status, update } = useSession()
 
-  useEffect(() => {
-    console.log('session', session);
-    console.log('status', status);
-  }, [])
-
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
       {/* Image Side */}

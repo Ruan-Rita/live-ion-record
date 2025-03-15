@@ -3,7 +3,8 @@ import { StorageStrategy } from './interfaces/storage.interface';
 import { LocalStorageStrategy } from './strategies/local-storage.strategies';
 import { UploadOptions } from './interfaces/upload-options.interface';
 import * as fs from 'fs';
-import path from 'path';
+import * as path from 'path';
+import { dateNowString } from 'src/helper';
 
 @Injectable()
 export class StorageService {
@@ -32,11 +33,20 @@ export class StorageService {
   }
 
   async uploadStream(fileName: string) {
-    await this.clearTemporary(fileName);
-
     const temporaryDirectory = '/temporary';
-    const pathToFiles = temporaryDirectory + '/' + fileName;
-    const outputFile = fileName + '/' + fileName;
+
+    const pathToFiles = path.join(
+      this.storageLocal.disk,
+      temporaryDirectory,
+      fileName,
+    );
+
+    const mimeType = fileName.substring(fileName.indexOf('.'), fileName.length);
+    const fileNameOnly = fileName.substring(0, fileName.indexOf('.'));
+    const outputFile = path.join(
+      this.storageLocal.disk,
+      fileNameOnly + dateNowString() + mimeType,
+    );
 
     // Check if the temp directory exists
     if (!fs.existsSync(pathToFiles)) {
@@ -51,7 +61,15 @@ export class StorageService {
     const writeStream = fs.createWriteStream(outputFile);
 
     for (const chunkFile of chunkFiles) {
-      const chunkPath = path.join(temporaryDirectory, chunkFile);
+      const chunkPath = path.join(
+        this.storageLocal.disk,
+        temporaryDirectory,
+        fileName,
+        chunkFile,
+      );
+
+      console.log('chuck path: ' + chunkPath);
+
       const chunkData = fs.readFileSync(chunkPath);
       writeStream.write(chunkData);
     }
