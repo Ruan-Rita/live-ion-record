@@ -1,7 +1,9 @@
+import { Record } from 'src/record/entities/record.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -34,4 +36,7 @@ export class User {
 
   @Column({ default: null })
   deletedAt?: Date;
+
+  @OneToMany(() => Record, (record) => record.user)
+  records: Record[];
 }

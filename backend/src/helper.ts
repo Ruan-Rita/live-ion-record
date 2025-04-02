@@ -1,8 +1,10 @@
 export function dateNowString() {
   const date = new Date();
-  const day = date.getDate();
-  const month = date.getMonth();
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
   const fullYear = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
 
-  return `${day > 9 ? day : '0' + day}${month > 9 ? month : '0' + month}${fullYear}`;
+  return `${day}${month}${fullYear}_${hours}h${minutes}m`;
 }

@@ -2,19 +2,43 @@
 <html>
 <head>
   <title>Minha Extensão</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     body { font-family: Arial, sans-serif; padding: 10px; }
     button { margin-top: 10px; }
   </style>
+  <link href="src/styles.css" rel="stylesheet">
 </head>
 <body>
-  <h1>Olá Mundo!</h1>
-  <h1>Screen Recorder</h1>
-  <button id="start">Start Recording</button>
-  <button id="stop" disabled>Stop Recording</button>
-  <video id="preview" controls></video>
-  <script src="popup.js"></script>
+  <div class="w-full min-h-screen bg-slate-400 overflow-hidden flex justify-end">
+    <section class="w-80 bg-white rounded-lg m-10 p-4 flex flex-col h-fit">
+      <div class="flex justify-between items-center">
+        <i class="fa fa-times text-2xl text-gray-700"></i>
+        <div class="bg-slate-300 flex rounded-full gap-5 items-center p-1">
+          <div class="flex items-center bg-white text-gray-700 px-3 py-2 rounded-full">
+            <i class="fa fa-video text-2xl"></i>
+          </div>
+          <div class="flex items-center px-3 py-2 rounded-full">
+            <i class="fa fa-camera text-2xl text-slate-700"></i>
+          </div>
+        </div>
+        <i class="fa fa-home text-2xl text-gray-700"></i>
+      </div>
+      <section class="my-5 flex flex-col gap-4">
+        <div class="p-3 px-4 bg-slate-100 rounded-full text-slate-700 font-bold">
+          <i class="fa fa-desktop mr-2"></i> Window
+        </div>
+        <div class="p-3 px-4 bg-slate-100 rounded-full text-slate-700 font-bold">
+          <i class="fa fa-video-slash mr-2"></i> No Camera
+        </div>
+        <div class="p-3 px-4 bg-slate-100 rounded-full text-slate-700 font-bold">
+          <i class="fa fa-microphone-slash mr-2"></i> No Microphone
+        </div>
+      </section>
+      <button class="px-2 py-3 bg-orange-500 shadow-md border border-orange-600 text-white rounded-lg" id="start">Start Recording</button>
+      <button class="px-2 py-3 bg-purple-500 shadow-md border border-purple-600 text-white rounded-lg" id="stop" disabled>Stop Recording</button>
+      <script src="src/popup.js"></script>
+    </section>
+  </div>
 </body>
-<script>
-</script>
 </html>
