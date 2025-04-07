@@ -4,7 +4,10 @@
   "version": "1.0",
   "description": "Uma extensão simples para o Chrome.",
   "permissions": ["tabs", "activeTab", "storage", "scripting"],
-  "host_permissions": ["http://localhost:3000/*"],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
   "action": {
     "default_popup": "index.html",
     "default_icon": {
@@ -14,6 +17,6 @@
     }
   },
   "background": {
-  "service_worker": "src/background.js"
-}
+    "service_worker": "src/background.js"
+  }
 }

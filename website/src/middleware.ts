@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-  console.log(token);
+  console.log('Token: ' + token);
   
   if (!token) {
     const loginUrl = new URL("/auth/login", request.url);

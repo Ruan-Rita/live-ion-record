@@ -11,6 +11,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             audio: true, // Set to true if you want to capture audio
         });
 
+        // Add overlay to the screen
+        chrome.runtime.sendMessage({ action: "injectOverlay" });
+
         // Create a MediaRecorder instance
         mediaRecorder = new MediaRecorder(stream);
 
@@ -34,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Handle when recording stops
         mediaRecorder.onstop = () => {
             // Stop the recording
-            // mediaRecorder.stop();
+            chrome.runtime.sendMessage({ action: "recordingStopped" });
             // Stop all tracks to release the screen capture
             mediaRecorder.stream.getTracks().forEach((track) => track.stop());
 
@@ -58,8 +61,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Start recording
         mediaRecorder.start(1000);
-        // Agora você pode enviar essa stream para processamento ou gravá-la
+
+        chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+            if (message.action === "stopMediaRecorder") {
+                if (mediaRecorder) {
+                    mediaRecorder.stop(); // Para a gravação
+                }
+            }
+        });
     } catch (error) {
         console.error("Erro ao capturar a tela:", error);
+    }
+});
+
+window.addEventListener('beforeunload', (event) => {
+    // Enviar mensagem para o service worker antes de fechar a página
+    if (mediaRecorder) {
+        mediaRecorder.stop(); // Para a gravação
+    }
+});
+
+window.addEventListener('unload', (event) => {
+    // Enviar mensagem para o service worker antes de fechar a página
+    if (mediaRecorder) {
+        mediaRecorder.stop(); // Para a gravação
     }
 });

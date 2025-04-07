@@ -68,8 +68,6 @@ export class StorageService {
         chunkFile,
       );
 
-      console.log('chuck path: ' + chunkPath);
-
       const chunkData = fs.readFileSync(chunkPath);
       writeStream.write(chunkData);
     }

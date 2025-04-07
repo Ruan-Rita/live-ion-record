@@ -22,8 +22,8 @@ export class LocalStorageStrategy implements StorageStrategy {
     options?: UploadOptions,
   ): Promise<string> {
     try {
-      const fullPath = path.join(this.disk, options.path);
-      const filePath = path.join(fullPath, options.fileName);
+      const fullPath = path.join(this.disk, options?.path ?? '');
+      const filePath = path.join(fullPath, options?.fileName ?? '');
 
       // Ensure upload directory exists
       await fs.mkdir(fullPath, { recursive: true });
