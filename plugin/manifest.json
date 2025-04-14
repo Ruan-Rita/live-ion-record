@@ -8,6 +8,12 @@
     "http://*/*",
     "https://*/*"
   ],
+  "externally_connectable": {
+    "matches": [
+      "http://*/*",
+      "https://*/*"
+    ]
+  },
   "action": {
     "default_popup": "index.html",
     "default_icon": {

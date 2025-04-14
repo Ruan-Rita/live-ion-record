@@ -7,7 +7,7 @@ declare global {
     interface Window {
         chrome?: {
             runtime: {
-                sendMessage: (message: any) => void;
+                sendMessage: (id:string, message: any) => void;
             };
         };
     }
@@ -18,19 +18,29 @@ export default function AuthPlugin() {
     const { data: sessionData } = useSession()
 
     useEffect(() => {
-        if (sessionData?.user.accessToken) {
-            // Use window.chrome instead of chrome directly
-            window.chrome?.runtime.sendMessage({
-                type: "AUTH_TOKEN",
-                token: sessionData?.user.accessToken,
-            });
-            
-            console.log('enviou?', sessionData?.user.accessToken);
+        if (typeof window === 'undefined') return; // Evita SSR
 
-            // Aguarda 500ms para dar tempo da extensão capturar
+        console.log('testando comunicação com a extensão...');
+      
+        console.log('sessionData?.user', sessionData?.user);
+        if (sessionData?.user?.accessToken) {
+            if (typeof window.chrome?.runtime !== 'undefined') {
+            console.log('chrome.runtime disponível!');
+        
+            const tokenToSend = sessionData?.user?.accessToken || 'token falso';
+                
+            window.chrome.runtime.sendMessage('aaijjlclkonknacikpiemijipdblgghe', {
+                type: "AUTH_TOKEN",
+                token: tokenToSend,
+            });
+        
             setTimeout(() => {
                 window.close();
             }, 500);
+        
+            } else {
+                console.log('chrome.runtime não está disponível.');
+            }
         }
     }, [sessionData]);
     

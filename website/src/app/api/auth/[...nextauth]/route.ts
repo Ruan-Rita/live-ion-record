@@ -20,7 +20,6 @@ const handler = NextAuth({
             const {accessToken} = result; 
             const user = await userBasicInfoApi(accessToken);
             user.accessToken = accessToken;
-            user.pato = 'pato';
             return user;
           }
 
@@ -30,6 +29,18 @@ const handler = NextAuth({
       
     ],
     callbacks: {
+      async jwt({ token, user }) {
+        console.log(user);
+        
+        if (user) {
+          token.id = Number(user.id);
+          token.name = user.name
+          token.email = user.email
+          token.accessToken = user.accessToken
+        }
+
+        return token;
+      },
       async session({ session, token }) {
         session = {
           ...session,

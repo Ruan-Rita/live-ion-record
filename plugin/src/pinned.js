@@ -25,7 +25,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 formData.append('index', chunkIndex++);
                 formData.append('filename', 'video.webm'); // Add the filename to identify the file on the server
       
-                chrome.storage.local.get(["ion_token"], async (result) => {
+                chrome.storage.local.get("ion_token", async (result) => {
+                    result = JSON.stringify(result);
                     console.log('result 222222222', result);
                     
                     formData.append('token', result);

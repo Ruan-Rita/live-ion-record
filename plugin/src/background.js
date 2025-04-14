@@ -1,6 +1,18 @@
 let pinnedTabId = null;
 
+chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
+    if (message.type === "AUTH_TOKEN") {
+        console.log("Token salvo da sessão do site!");
+
+        chrome.storage.local.set({ ion_token: message.token }, () => {
+            console.log("Token salvo da sessão do site!");
+        });
+    }
+});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log('Mensagem recebida:', message);
+
     if (message.action === "openPinnedTab") {
         chrome.tabs.create({
             url: chrome.runtime.getURL("pinned.html"),
@@ -41,14 +53,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     
     if (message.action === "recordingStopped") {
         removeOverlay();
-    }
-
-    if (message.type === "FROM_PAGE") {
-        console.log("Token salvo da sessão do site!");
-
-        chrome.storage.local.set({ ion_token: message.token }, () => {
-            console.log("Token salvo da sessão do site!");
-        });
     }
 });
 
