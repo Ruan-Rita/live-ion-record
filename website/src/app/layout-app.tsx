@@ -11,7 +11,6 @@ export default function LayoutApp({
   children: React.ReactNode;
   session: Session
 }>) {
-
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />

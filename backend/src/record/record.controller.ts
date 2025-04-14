@@ -14,6 +14,7 @@ import { UpdateRecordDto } from './dto/update-record.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { StorageService } from 'src/storage/storage.service';
 import { Public } from 'src/auth/constant';
+import { log } from 'console';
 
 @Controller('record')
 export class RecordController {
@@ -29,10 +30,11 @@ export class RecordController {
     @UploadedFile() file: Express.Multer.File,
     @Body('filename') filename: string,
     @Body('index') index: string,
+    @Body('token') token: string,
   ) {
     const fileFolder = filename;
     const fileName = `chunk${index}.webm`;
-
+    console.log('token', token);
     await this.storageService.temporary(file, {
       fileName,
       path: fileFolder,

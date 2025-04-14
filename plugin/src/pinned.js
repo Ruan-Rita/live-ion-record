@@ -25,9 +25,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                 formData.append('index', chunkIndex++);
                 formData.append('filename', 'video.webm'); // Add the filename to identify the file on the server
       
-                await fetch(`${apiDomain}/record/upload-chunks`, {
-                  method: 'POST',
-                  body: formData,
+                chrome.storage.local.get(["ion_token"], async (result) => {
+                    console.log('result 222222222', result);
+                    
+                    formData.append('token', result);
+                    await fetch(`${apiDomain}/record/upload-chunks`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            "Authorization": `Bearer ${result}`
+                        },
+                      })
                 });
 
                 recordedChunks.push(event.data);

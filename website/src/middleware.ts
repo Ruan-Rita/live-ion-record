@@ -1,11 +1,9 @@
 import { getToken } from 'next-auth/jwt';
-import { getSession } from 'next-auth/react';
 import { NextResponse, type NextRequest } from 'next/server';
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-  console.log('Token: ' + token);
   
   if (!token) {
     const loginUrl = new URL("/auth/login", request.url);
@@ -23,6 +21,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|auth|).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|auth|images|$).*)',
   ],
 };

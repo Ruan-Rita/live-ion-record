@@ -11,7 +11,7 @@ import { redirect } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { indentifierErrorFieldApi } from '@/lib/utils';
 import ErrorForm from '@/components/error-form/error-form';
-import { signUpApi } from '@/api/user';
+import { signUpApi } from '@/service/user';
 
 export default function Register() {
   const {
@@ -45,12 +45,13 @@ export default function Register() {
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
       {/* Image Side */}
-      <div className="relative hidden w-full lg:block lg:w-1/2 bg-emerald-200">
+      <div className="relative hidden w-full lg:block lg:w-1/2" style={{backgroundColor: '#7c24d9', background: 'linear-gradient(90deg, #7c24d9, #4a03b8)'}}>
         <Image
-          src="/background.png?height=1080&width=1920"
+          src="/images/background.png"
           alt="Login visual"
-          layout="fill"
-          objectFit="cover"
+          width={1920}
+          height={1080}
+          className="w-full h-full object-cover animate-[rotation_100s_linear_infinite]"
           priority
         />
       </div>

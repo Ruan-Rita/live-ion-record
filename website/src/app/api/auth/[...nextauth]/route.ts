@@ -1,5 +1,5 @@
-import { loginApi } from "@/api/auth"
-import { userBasicInfoApi } from "@/api/user"
+import { loginApi } from "@/service/auth"
+import { userBasicInfoApi } from "@/service/user"
 import NextAuth, { AuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
@@ -20,6 +20,7 @@ const handler = NextAuth({
             const {accessToken} = result; 
             const user = await userBasicInfoApi(accessToken);
             user.accessToken = accessToken;
+            user.pato = 'pato';
             return user;
           }
 
@@ -29,23 +30,13 @@ const handler = NextAuth({
       
     ],
     callbacks: {
-      async jwt({ token, user }) {
-        console.log(user);
-        
-        if (user) {
-          token.id = Number(user.id);
-          token.name = user.name
-          token.email = user.email
-          token.token = user.token
-        }
-        return token;
-      },
       async session({ session, token }) {
         session = {
           ...session,
           user: {
-            id: token.id,
-            role: token.role,
+            name: token.name,
+            email: token.email,
+            accessToken: token.accessToken,
           }
         }
 

@@ -42,6 +42,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "recordingStopped") {
         removeOverlay();
     }
+
+    if (message.type === "FROM_PAGE") {
+        console.log("Token salvo da sessão do site!");
+
+        chrome.storage.local.set({ ion_token: message.token }, () => {
+            console.log("Token salvo da sessão do site!");
+        });
+    }
 });
 
 function injectOverlay() {

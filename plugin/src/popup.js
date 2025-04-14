@@ -1,11 +1,4 @@
 const startButton = document.getElementById("start");
-const stopButton = document.getElementById("stop");
-// const preview = document.getElementById("preview");
-const apiDomain = 'http://localhost:3001';
-
-let mediaRecorder;
-let recordedChunks = [];
-let chunkIndex = 0;
 
 startButton.addEventListener("click", async () => {
     try {
@@ -19,18 +12,36 @@ startButton.addEventListener("click", async () => {
     }
 });
 
-stopButton.addEventListener("click", () => {
-    // // Stop the recording
-    // mediaRecorder.stop();
-    // // Stop all tracks to release the screen capture
-    // mediaRecorder.stream.getTracks().forEach((track) => track.stop());
-    // startButton.disabled = false;
-    // stopButton.disabled = true;
+window.addEventListener("message", (event) => {
+    chrome.runtime.sendMessage({
+        type: "FROM_PAGE",
+        token: event
+    });
 
-    // // Notify server that the upload is complete
-    // fetch(`${apiDomain}/record/complete`, {
-    //     method: 'POST',
-    //     body: JSON.stringify({ filename: 'video.webm' }),
-    //     headers: { 'Content-Type': 'application/json' },
-    // });
+    if (event.source !== window) return;
+
+    if (event.data.type === "FROM_PAGE") {
+        chrome.runtime.sendMessage({
+            type: "FROM_PAGE",
+            token: event.data.token
+        });
+    }
 });
+
+if (true) {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const currentTabId = tabs[0].id;
+    
+        chrome.tabs.create({
+            url: "http://localhost:3000/auth/plugin",
+            active: false, // Não traz a aba pro foco
+        }, (newTab) => {
+            // Aguarda autenticação (você pode escutar ou usar chrome.runtime.onMessage)
+    
+            // Depois de um tempo, volta para a aba original (se quiser):
+            setTimeout(() => {
+                chrome.tabs.update(currentTabId, { active: true });
+            }, 3000);
+        });
+    });
+}

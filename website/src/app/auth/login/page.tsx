@@ -29,6 +29,8 @@ export default function Login() {
   const router = useRouter()
   async function loginForm(inputs: LoginApiData) {
     const response = await signIn('credentials', {redirect: false, ...inputs})
+    console.log('what i received', response);
+    
     if (response?.status === 200) {
       toast.success("Logged and redirecting . . .");
       setTimeout(() => {
@@ -39,19 +41,17 @@ export default function Login() {
     toast.error(response?.error || 'Something goes wrong!');
   }
 
-  const { data: session, status, update } = useSession()
-
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
       {/* Image Side */}
-      <div className="relative hidden w-full lg:block lg:w-1/2">
-        <Image
+      <div className="relative hidden w-full lg:block lg:w-1/2" style={{backgroundColor: '#7c24d9', background: 'linear-gradient(90deg, #7c24d9, #4a03b8)'}}>
+        {/* <Image
           src="/cubic-blu.jpg?height=1080&width=1920"
           alt="Login visual"
           layout="fill"
           objectFit="cover"
           priority
-        />
+        /> */}
       </div>
 
       {/* Form Side */}
