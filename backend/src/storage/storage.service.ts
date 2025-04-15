@@ -43,9 +43,10 @@ export class StorageService {
 
     const mimeType = fileName.substring(fileName.indexOf('.'), fileName.length);
     const fileNameOnly = fileName.substring(0, fileName.indexOf('.'));
+    const finalName = fileNameOnly + dateNowString() + mimeType;
     const outputFile = path.join(
       this.storageLocal.disk,
-      fileNameOnly + dateNowString() + mimeType,
+      finalName,
     );
 
     // Check if the temp directory exists
@@ -99,7 +100,7 @@ export class StorageService {
     return {
       success: true,
       message: 'File uploaded successfully',
-      path: outputFile,
+      path: finalName,
     };
   }
 }

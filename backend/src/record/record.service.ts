@@ -71,6 +71,10 @@ export class RecordService {
     return this.recordRepository.save({ ...createRecordDto, user });
   }
 
+  async findAll(userId: number) {
+    return this.recordRepository.find({ where: { user: { id: userId } } });
+  }
+
   update(id: number, updateRecordDto: UpdateRecordDto) {
     return this.recordRepository.update(id, updateRecordDto);
   }

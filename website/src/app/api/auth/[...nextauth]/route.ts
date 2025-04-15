@@ -18,6 +18,8 @@ const handler = NextAuth({
           // If no error and we have user data, return it
           if (result && result.statusCode == 201) {
             const {accessToken} = result; 
+            console.log('thus token is right', accessToken);
+            
             const user = await userBasicInfoApi(accessToken);
             user.accessToken = accessToken;
             return user;

@@ -2,6 +2,7 @@ const apiDomain = 'http://localhost:3001';
 let mediaRecorder;
 let recordedChunks = [];
 let chunkIndex = 0;
+const uuid = crypto.randomUUID();
 
 document.addEventListener("DOMContentLoaded", async () => {
     try {
@@ -18,25 +19,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         mediaRecorder = new MediaRecorder(stream);
 
         // Collect chunks of recorded data
-        mediaRecorder.ondataavailable = async (event) => {
+        mediaRecorder.ondataavailable = async (event) => {            
             if (event.data.size > 0) {
                 const formData = new FormData();
                 formData.append('chunk', event.data);
                 formData.append('index', chunkIndex++);
+                formData.append('token', uuid);
                 formData.append('filename', 'video.webm'); // Add the filename to identify the file on the server
       
                 chrome.storage.local.get("ion_token", async (result) => {
-                    result = JSON.stringify(result);
-                    console.log('result 222222222', result);
+                    const token = result.ion_token;
                     
-                    formData.append('token', result);
                     await fetch(`${apiDomain}/record/upload-chunks`, {
                         method: 'POST',
                         body: formData,
                         headers: {
-                            "Authorization": `Bearer ${result}`
+                            "Authorization": `Bearer ${token}`
                         },
-                      })
+                    })
                 });
 
                 recordedChunks.push(event.data);
@@ -50,21 +50,25 @@ document.addEventListener("DOMContentLoaded", async () => {
             // Stop all tracks to release the screen capture
             mediaRecorder.stream.getTracks().forEach((track) => track.stop());
 
-            // Notify server that the upload is complete
-            fetch(`${apiDomain}/record/complete`, {
-                method: 'POST',
-                body: JSON.stringify({ filename: 'video.webm' }),
-                headers: { 'Content-Type': 'application/json' },
-            }).then(() => {
-                try {
-                    chrome.runtime.sendMessage({ action: "closePinnedTab" }, (response) => {
-                        if (response && response.success) {
-                            console.log("Aba fixada criada com sucesso!", response.tabId);
-                        }
-                    });
-                } catch (err) {
-                    console.error("Error close pinned tab:", err);
-                }
+            chrome.storage.local.get("ion_token", async (result) => {
+                const token = result.ion_token;
+                
+                // Notify server that the upload is complete
+                fetch(`${apiDomain}/record/complete`, {
+                    method: 'POST',
+                    body: JSON.stringify({ filename: 'video.webm', token: uuid }),
+                    headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${token}` },
+                }).then(() => {
+                    try {
+                        chrome.runtime.sendMessage({ action: "closePinnedTab" }, (response) => {
+                            if (response && response.success) {
+                                console.log("Aba fixada criada com sucesso!", response.tabId);
+                            }
+                        });
+                    } catch (err) {
+                        console.error("Error close pinned tab:", err);
+                    }
+                });
             });
         };
 

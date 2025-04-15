@@ -1,4 +1,7 @@
+import { useEffect, useState } from "react";
 import { VideoCard } from "./video-card"
+import { useSession } from "next-auth/react";
+import { listRecordsApi } from "@/service/record";
 
 // This is sample data. Replace it with your actual data fetching logic.
 
@@ -14,10 +17,23 @@ const videos = [
 ]
 
 export function VideoGrid() {
+  const [videos, setVideos] = useState<any[]>([]);
+  const { data: sessionData } = useSession()
+
+  useEffect(() => {
+    if (sessionData?.user?.accessToken) {
+      fetchVideos();
+    }
+  }, [sessionData]);
+
+  const fetchVideos = async () => {
+    const response = await listRecordsApi(sessionData?.user?.accessToken);
+    setVideos(response);
+  };
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {videos.map((video) => (
-        <VideoCard key={video.id} video={video} />
+        <VideoCard key={video.id} video={video}/>
       ))}
     </div>
   )

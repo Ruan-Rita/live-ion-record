@@ -71,4 +71,17 @@ export class RecordController {
     
     return { success: false, message: 'Failed to upload record' };
   }
+
+  @Get('list')
+  async listRecords(@Req() request: AuthenticatedRequest) {
+    const user = request.user;
+    const results = await this.recordService.findAll(user.id);
+    
+    return results.map(result => ({
+      id: result.id,
+      name: result.name,
+      filePath: result.filePath,
+      url: `${process.env.APP_URL}/uploads/${result.filePath}`,
+    }));
+  }
 }
