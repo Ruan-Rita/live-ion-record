@@ -16,11 +16,14 @@ export class Record {
   @Column({ length: 500 })
   name: string;
 
-  @Column('text')
-  description: string;
+  @Column('text', { nullable: true })
+  description?: string;
 
   @Column()
-  filename: string;
+  token: string;
+
+  @Column()
+  filePath: string;
 
   @CreateDateColumn()
   createdAt: Date;

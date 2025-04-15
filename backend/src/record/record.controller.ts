@@ -8,6 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  Req,
 } from '@nestjs/common';
 import { RecordService } from './record.service';
 import { UpdateRecordDto } from './dto/update-record.dto';
@@ -15,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { StorageService } from 'src/storage/storage.service';
 import { Public } from 'src/auth/constant';
 import { log } from 'console';
+import { AuthenticatedRequest } from 'src/auth/interface/authenticate-request.type';
 
 @Controller('record')
 export class RecordController {
@@ -23,7 +25,6 @@ export class RecordController {
     private readonly storageService: StorageService,
   ) {}
 
-  @Public()
   @Post('/upload-chunks')
   @UseInterceptors(FileInterceptor('chunk'))
   async uploadRecordChunks(
@@ -31,48 +32,43 @@ export class RecordController {
     @Body('filename') filename: string,
     @Body('index') index: string,
     @Body('token') token: string,
+    @Req() request: AuthenticatedRequest
   ) {
-    const fileFolder = filename;
-    const fileName = `chunk${index}.webm`;
-    console.log('token', token);
-    await this.storageService.temporary(file, {
-      fileName,
-      path: fileFolder,
+    const user = request.user;
+    
+    await this.recordService.createOrUpdate({
+      filename,
+      index: +index,
+      file,
+      userId: user.id,
+      token: token,
     });
 
     return { success: true, message: 'Chunk uploaded successfully' };
   }
 
-  @Public()
   @Post('complete')
-  async completeUpload(@Body('filename') filename: string) {
-    return await this.storageService.uploadStream(filename);
-  }
+  async completeUpload(
+    @Body('filename') filename: string, 
+    @Body('token') token: string,
+    @Req() request: AuthenticatedRequest
+  ) {
+    const user = request.user;
+    const result = await this.storageService.uploadStream(filename);
 
-  @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    const fileUrl = await this.storageService.upload(file);
-    return { url: fileUrl };
-  }
+    if (result.success) {
+      const record = await this.recordService.findOne(token, user.id);
 
-  @Get()
-  findAll() {
-    return this.recordService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.recordService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRecordDto: UpdateRecordDto) {
-    return this.recordService.update(+id, updateRecordDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.recordService.remove(+id);
+      if (record) {
+        await this.recordService.update(record.id, {
+          filePath: result.path,
+        });
+        return { success: true, message: 'Record uploaded successfully' };
+      }
+      
+      return { success: false, message: 'Failed to upload record' };
+    }
+    
+    return { success: false, message: 'Failed to upload record' };
   }
 }

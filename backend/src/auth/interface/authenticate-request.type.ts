@@ -1,11 +1,6 @@
 import { Request } from 'express';
+import { User } from 'src/user/entities/user.entity';
 
 export interface AuthenticatedRequest extends Request {
-  user: {
-    sub: number;
-    name: string;
-    email: string;
-    iat: number;
-    exp: number;
-  };
+  user: User;
 }
