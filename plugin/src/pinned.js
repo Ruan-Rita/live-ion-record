@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
 
         // Start recording
-        mediaRecorder.start(1000);
+        mediaRecorder.start(100);
 
         chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             if (message.action === "stopMediaRecorder") {

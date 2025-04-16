@@ -20,9 +20,13 @@ declare module "next-auth" {
 
 declare module "next-auth/jwt" {
     interface DefaultJWT {
-        id: number;
-        name: string,
-        email: string,
-        token: string,
+      id: number,
+      name: string,
+      email: string,
+      sub: string,
+      accessToken: string,
+      iat: number,
+      exp: number,
+      jti: string
     }
 }

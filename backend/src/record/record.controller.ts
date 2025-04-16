@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Req,
+  NotFoundException,
 } from '@nestjs/common';
 import { RecordService } from './record.service';
 import { UpdateRecordDto } from './dto/update-record.dto';
@@ -78,10 +79,21 @@ export class RecordController {
     const results = await this.recordService.findAll(user.id);
     
     return results.map(result => ({
-      id: result.id,
-      name: result.name,
-      filePath: result.filePath,
+      ...result,
       url: `${process.env.APP_URL}/uploads/${result.filePath}`,
     }));
+  }
+
+  @Get(':token')
+  async getRecord(@Param('token') token: string, @Req() request: AuthenticatedRequest) {
+    const user = request.user;
+    const result = await this.recordService.findOne(token, user.id);
+    if (!result) {
+      throw new NotFoundException('Record not found');
+    }
+    return {
+      ...result,
+      url: `${process.env.APP_URL}/uploads/${result.filePath}`,
+    };
   }
 }
