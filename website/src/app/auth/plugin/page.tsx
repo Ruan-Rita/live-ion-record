@@ -1,4 +1,5 @@
 'use client'
+import { notifyPluginService } from "@/service/plugin/ServiceWorker";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 
@@ -20,30 +21,17 @@ export default function AuthPlugin() {
     useEffect(() => {
         if (typeof window === 'undefined') return; // Evita SSR
 
-        console.log('testando comunicação com a extensão...');
-      
-        console.log('sessionData?.user', sessionData?.user);
         if (sessionData?.user?.accessToken) {
-            if (typeof window.chrome?.runtime !== 'undefined') {
-            console.log('chrome.runtime disponível!');
-        
-            const tokenToSend = sessionData?.user?.accessToken || 'token falso';
-                
-            window.chrome.runtime.sendMessage('aaijjlclkonknacikpiemijipdblgghe', {
+            const message = {
                 type: "AUTH_TOKEN",
-                token: tokenToSend,
-            });
-        
-            setTimeout(() => {
-                window.close();
-            }, 500);
-        
-            } else {
-                console.log('chrome.runtime não está disponível.');
+                data: sessionData?.user?.accessToken,
             }
+            notifyPluginService(message)
         }
     }, [sessionData]);
     
+    
+
     return (
         <div className="flex flex-col items-center justify-center h-screen">
             <h1 className="text-2xl font-bold text-center mb-4">Plugin Authentication</h1>

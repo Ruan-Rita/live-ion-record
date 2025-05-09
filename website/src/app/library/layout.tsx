@@ -20,7 +20,7 @@ export default function RootLayout({
       <div className="flex h-screen w-full">
         <CompSidebar />
         <SidebarInset className="flex-1 max-w-screen-lg mx-auto">
-          <main className="h-full overflow-auto p-4">{children}</main>
+          <main className="h-full p-4">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>

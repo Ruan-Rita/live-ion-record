@@ -5,10 +5,10 @@ let pinnedTabId = null;
  */
 chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
     if (message.type === "AUTH_TOKEN") {
-        console.log("Token salvo da sessão do site!");
+        console.log("Token salvo da sessão do site! token: ", message.data);
 
-        chrome.storage.local.set({ ion_token: message.token }, () => {
-            console.log("Token salvo da sessão do site!");
+        chrome.storage.local.set({ ion_token: message.data }, () => {
+            console.log("Token salvo no plugin! token: " + message.data);
         });
     }
 });

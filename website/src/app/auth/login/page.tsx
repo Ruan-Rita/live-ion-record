@@ -41,31 +41,31 @@ export default function Login() {
     toast.error(response?.error || 'Something goes wrong!');
   }
 
+  function goHome() {
+    router.push('/')
+  }
+
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
-      {/* Image Side */}
-      <div className="relative hidden w-full lg:block lg:w-1/2" style={{backgroundColor: '#7c24d9', background: 'linear-gradient(90deg, #7c24d9, #4a03b8)'}}>
-        {/* <Image
-          src="/cubic-blu.jpg?height=1080&width=1920"
-          alt="Login visual"
-          layout="fill"
-          objectFit="cover"
-          priority
-        /> */}
-      </div>
-
-      {/* Form Side */}
-      <div className="flex w-full items-center justify-center px-4 py-12 sm:px-6 lg:w-1/2 lg:px-8">
+      <div className="relative w-full flex justify-center pt-[15vh] flex-1 p-5" style={{backgroundColor: '#7c24d9', background: 'linear-gradient(90deg, #3a1561, #140033)'}}>
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+            <h2 className="text-xl font-extrabold text-gray-200 flex fill-gray-300 justify-center items-center gap-2 cursor-pointer hover:text-blue-200 hover:fill-blue-200" onClick={goHome}>
+              <svg stroke="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="24px" width="24px" xmlns="http://www.w3.org/2000/svg">
+                <path fill="none" d="M24 24H0V0h24v24z"></path>
+                <circle cx="9" cy="12" r="8"></circle>
+                <path d="M17 4.26v2.09a5.99 5.99 0 0 1 0 11.3v2.09c3.45-.89 6-4.01 6-7.74s-2.55-6.85-6-7.74z"></path>
+              </svg>
+              Ion Recording
+            </h2>
+            <h2 className="mt-1 text-3xl font-extrabold text-white">
               Sign in to your account
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-400">
               Or{' '}
               <Link
                 href="/auth/register"
-                className="font-medium text-primary hover:text-primary/80"
+                className="font-medium text-blue-300 hover:text-blue-500"
               >
                 create a new account
               </Link>
@@ -74,23 +74,23 @@ export default function Login() {
           <form className="mt-8 space-y-6" onSubmit={handleSubmit(loginForm)}>
             <div className="space-y-4 rounded-md">
               <div>
-                <Label htmlFor="email-address">Email address</Label>
+                <Label htmlFor="email-address" className='text-gray-200 '>Email address</Label>
                 <Input
                   {...register('email', {required: true})}
                   type="email"
                   autoComplete="email"
-                  className="mt-1"
+                  className="mt-1 bg-gray-900 border-gray-950 text-purple-400 h-12 hover:bg-gray-950"
                   placeholder="Enter your email"
                 />
                 <ErrorForm errors={errors} nameField="email" />
               </div>
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className='text-gray-200'>Password</Label>
                 <Input
                   {...register('password', {required: true})}
                   type="password"
                   autoComplete="current-password"
-                  className="mt-1"
+                  className="mt-1 bg-gray-900 border-gray-950 text-purple-400 h-12 hover:bg-gray-950"
                   placeholder="Enter your password"
                 />
                 <ErrorForm errors={errors} nameField="password" />
@@ -107,7 +107,7 @@ export default function Login() {
                 />
                 <label
                   htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-900"
+                  className="ml-2 block text-sm text-gray-100"
                 >
                   Remember me
                 </label>
@@ -116,7 +116,7 @@ export default function Login() {
               <div className="text-sm">
                 <Link
                   href="/forgot-password"
-                  className="font-medium text-primary hover:text-primary/80"
+                  className="font-medium text-gray-100"
                 >
                   Forgot your password?
                 </Link>
@@ -124,8 +124,8 @@ export default function Login() {
             </div>
 
             <div>
-              <Button type="submit" className="w-full">
-                Sign in
+              <Button type="submit" className="w-full h-12" style={{backgroundColor: '#7c24d9', background: 'linear-gradient(90deg, #7c24d9, #4a03b8)'}}>
+                SIGN IN
               </Button>
             </div>
           </form>
@@ -133,17 +133,17 @@ export default function Login() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-puple-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500">
+                <span className="bg-purple-200 rounded-lg px-2 text-purple-600">
                   Or continue with
                 </span>
               </div>
             </div>
 
             <div className="mt-6">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full h-12 hover:bg-purple-300 border-purple-500">
                 <svg
                   className="mr-2 h-4 w-4"
                   aria-hidden="true"

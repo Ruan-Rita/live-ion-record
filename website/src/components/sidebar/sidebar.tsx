@@ -13,14 +13,16 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
 import { signOut } from 'next-auth/react';
+import BrandIcon from '@/public/brand.svg'
+import Image from 'next/image';
 
 export function CompSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center space-x-2 px-6 py-4">
-          <div className="h-8 w-8 rounded-full bg-primary" />
-          <span className="text-lg font-bold">YourBrand</span>
+          <Image src={BrandIcon} alt="Ion Recording Icon"/>
+          <span className="text-lg font-bold" style={{color: '#592999'}}>Ion Recording</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -41,14 +43,6 @@ export function CompSidebar() {
               <Link href="/library">
                 <Book className="mr-2 h-4 w-4" />
                 <span>Library</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/records">
-                <Disc className="mr-2 h-4 w-4" />
-                <span>Records</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

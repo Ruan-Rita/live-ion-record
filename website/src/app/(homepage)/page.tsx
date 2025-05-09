@@ -7,7 +7,11 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#1a0b2e] text-white flex flex-col">
       <header className="container mx-auto px-4 py-6 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <CheckCircle className="h-6 w-6 stroke-gray-400" />
+          <svg stroke="currentColor" className="fill-gray-300" strokeWidth="0" viewBox="0 0 24 24" height="24px" width="24px" xmlns="http://www.w3.org/2000/svg">
+            <path fill="none" d="M24 24H0V0h24v24z"></path>
+            <circle cx="9" cy="12" r="8"></circle>
+            <path d="M17 4.26v2.09a5.99 5.99 0 0 1 0 11.3v2.09c3.45-.89 6-4.01 6-7.74s-2.55-6.85-6-7.74z"></path>
+          </svg>
           <span className="text-xl font-semibold text-gray-400">Ion Recording</span>
         </div>
         <Link

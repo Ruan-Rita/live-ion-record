@@ -1,39 +1,61 @@
+version: '3.8'
+
 services:
-  # api_server:
-  #   build: .
-  #   container_name: 'API_SERVER'
-  #   ports:
-  #     - '3001:3001'
-  #   environment:
-  #     NODE_ENV: production
-  #   volumes:
-  #     - ./:/app:cached
+  server_api:
+    build: backend/.
+    container_name: 'SERVER_API'
+    ports:
+      - '3001:3001'
+    environment:
+      NODE_ENV: 'production'
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_TEST_HOST: ${DB_TEST_HOST}
+      DB_TEST_PORT: ${DB_TEST_PORT}
+      DB_TEST_USERNAME: ${DB_TEST_USERNAME}
+      DB_TEST_PASSWORD: ${DB_TEST_PASSWORD}
+      DB_TEST_DATABASE: ${DB_TEST_DATABASE}
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - app-network
 
   db_app:
     image: postgres:17
     container_name: DATABASE
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin_password
-      POSTGRES_DB: ion-record
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
     volumes:
       - database_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - app-network
 
   db_test:
     image: postgres:17
     container_name: DATABASE_TEST
     environment:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test_password
-      POSTGRES_DB: ion-record
+      POSTGRES_USER: ${DB_TEST_USERNAME}
+      POSTGRES_PASSWORD: ${DB_TEST_PASSWORD}
+      POSTGRES_DB: ${DB_TEST_DATABASE}
     volumes:
       - database_test_data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+    networks:
+      - app-network
 
 volumes:
   database_data:
   database_test_data:
-  # api_data:
+
+networks:
+  app-network:
+    driver: bridge
