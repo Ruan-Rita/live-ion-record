@@ -19,8 +19,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       entities: [],
-      synchronize:
-        !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
+      synchronize: false,
+        // !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
       autoLoadEntities:
         !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
     }),

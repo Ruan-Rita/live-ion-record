@@ -29,13 +29,12 @@ export default function Login() {
   const router = useRouter()
   async function loginForm(inputs: LoginApiData) {
     const response = await signIn('credentials', {redirect: false, ...inputs})
-    console.log('what i received', response);
     
     if (response?.status === 200) {
       toast.success("Logged and redirecting . . .");
       setTimeout(() => {
         router.push('/library')
-      }, 2000)
+      }, 1000)
       return;
     }
     toast.error(response?.error || 'Something goes wrong!');
@@ -44,6 +43,10 @@ export default function Login() {
   function goHome() {
     router.push('/')
   }
+
+  useEffect(() => {
+    fetch('/api/auth/force-logout');
+  })
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">

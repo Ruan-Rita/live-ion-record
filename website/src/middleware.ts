@@ -15,8 +15,6 @@ export async function middleware(request: NextRequest) {
   const userBasicInfo = await userBasicInfoApi(token.accessToken);
 
   if (!userBasicInfo || userBasicInfo.statusCode === 401) {
-    signOut();
-
     return NextResponse.redirect(loginUrl);
   }
 

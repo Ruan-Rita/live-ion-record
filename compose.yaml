@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   server_api:
     build: backend/.
@@ -51,6 +49,16 @@ services:
       - "5433:5432"
     networks:
       - app-network
+    
+  website:
+    build: website/.
+    container_name: 'WEB_SITE'
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: 'production'
+    volumes:
+      - ./website:/app
 
 volumes:
   database_data:
