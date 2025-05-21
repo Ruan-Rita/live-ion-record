@@ -16,13 +16,19 @@ export async function userBasicInfoApi(accessToken: string) {
 }
 
 export const signUpApi = async (income: SignUpApiData) => {
-    const response = await axios.post(`${API_URL}/user`, JSON.stringify(income), getHeaderAxios()).catch(error => {
-      return error.response;
+    const response = await axios.post(`${API_URL}/user`, JSON.stringify(income), getHeaderAxios())
+    .then(responseAxios => {
+        return {
+            data: responseAxios.data.data,
+            status: responseAxios.status
+        }
+    })
+    .catch(responseAxios => {
+        return {
+            data: responseAxios.message,
+            status: responseAxios.status
+        }
     });
 
-    if (response?.data && !response?.data?.statusCode) {
-        response.data.statusCode = response?.request?.res?.statusCode 
-    }
-    
-    return response?.data || response;
+    return response;
 }

@@ -36,6 +36,7 @@ export class RecordController {
     @Req() request: AuthenticatedRequest
   ) {
     const user = request.user;
+    console.log('Chegando chunks');
     
     await this.recordService.createOrUpdate({
       filename,
@@ -54,6 +55,7 @@ export class RecordController {
     @Body('token') token: string,
     @Req() request: AuthenticatedRequest
   ) {
+    console.log('complete videos');
     const user = request.user;
     const result = await this.storageService.uploadStream(filename);
 
@@ -64,6 +66,9 @@ export class RecordController {
         await this.recordService.update(record.id, {
           filePath: result.path,
         });
+
+        console.log('complete videos uploaded');
+
         return { success: true, message: 'Record uploaded successfully' };
       }
       
@@ -80,7 +85,7 @@ export class RecordController {
     
     return results.map(result => ({
       ...result,
-      url: `${process.env.APP_URL}/uploads/${result.filePath}`,
+      url: `${process.env.APP_URL}/uploads/videosRaw/${result.filePath}`,
     }));
   }
 
@@ -93,7 +98,7 @@ export class RecordController {
     }
     return {
       ...result,
-      url: `${process.env.APP_URL}/uploads/${result.filePath}`,
+      url: `${process.env.APP_URL}/uploads/videosRaw/${result.filePath}`,
     };
   }
 }

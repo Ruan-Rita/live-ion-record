@@ -1,5 +1,5 @@
 import { StorageStrategy } from '../interfaces/storage.interface';
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import localStorageConfig from '../config/local-storage.config';
@@ -14,7 +14,7 @@ export class LocalStorageStrategy implements StorageStrategy {
     @Inject(localStorageConfig.KEY)
     configStorage: ConfigType<typeof localStorageConfig>,
   ) {
-    this.disk = path.join(__dirname, '../../../' + configStorage.disk);
+    this.disk = path.join(__dirname, '../../../../' + configStorage.disk);
   }
 
   async upload(
@@ -25,22 +25,27 @@ export class LocalStorageStrategy implements StorageStrategy {
       const fullPath = path.join(this.disk, options?.path ?? '');
       const filePath = path.join(fullPath, options?.fileName ?? '');
 
+      if (!options?.fileName) {
+        throw new Error('File name is required for upload.');
+      }
+      
       // Ensure upload directory exists
       await fs.mkdir(fullPath, { recursive: true });
-
+  
       // Save the file
       await fs.writeFile(filePath, file.buffer);
-
+  
       return filePath;
     } catch (e) {
       console.log('errr', e);
+      throw new InternalServerErrorException('Failed to save file to storage.');
     }
   }
 
   async temporary(file: Express.Multer.File, options?: UploadOptions) {
     const newOptions: UploadOptions = {
       ...options,
-      path: '/temporary',
+      path: 'temporary',
     };
 
     if (options.path) {
@@ -59,6 +64,6 @@ export class LocalStorageStrategy implements StorageStrategy {
     const temporaryPath = '/temporary';
     const finalPath = path.join(this.disk, temporaryPath, pathFiles);
 
-    await fs.rm(finalPath, { recursive: true, force: true });
+    await fs.rm(finalPath, { recursive: true, force: true }).catch(() => {});
   }
 }

@@ -44,8 +44,12 @@ export class StorageService {
     const mimeType = fileName.substring(fileName.indexOf('.'), fileName.length);
     const fileNameOnly = fileName.substring(0, fileName.indexOf('.'));
     const finalName = fileNameOnly + dateNowString() + mimeType;
+
+    const finalDirectory = path.join(this.storageLocal.disk, 'videosRaw');
+    await fs.promises.mkdir(finalDirectory, { recursive: true });
+
     const outputFile = path.join(
-      this.storageLocal.disk,
+      finalDirectory,
       finalName,
     );
 
@@ -93,10 +97,14 @@ export class StorageService {
       size: fileBuffer.length,
     } as Express.Multer.File;
 
-    await this.upload(file); // Agora o objeto segue o formato correto
+    await this.upload(file, { 
+      path: 'videosRaw', 
+      fileName: finalName 
+    }); // Agora o objeto segue o formato correto
 
     await this.clearTemporary(fileName);
-
+    console.log('whats final name', {finalName});
+    
     return {
       success: true,
       message: 'File uploaded successfully',

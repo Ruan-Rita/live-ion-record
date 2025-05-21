@@ -39,8 +39,8 @@ if (true) {
             // Aguarda autenticação (você pode escutar ou usar chrome.runtime.onMessage)
     
             // Depois de um tempo, volta para a aba original (se quiser):
+            chrome.tabs.update(currentTabId, { active: true });
             setTimeout(() => {
-                chrome.tabs.update(currentTabId, { active: true });
             }, 3000);
         });
     });

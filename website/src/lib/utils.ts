@@ -7,6 +7,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function indentifierErrorFieldApi(messages: string[]) {
+  if (! Array.isArray(messages)) {
+    return {};
+  }
   const errors: any = {};
     
   messages.forEach(message => {

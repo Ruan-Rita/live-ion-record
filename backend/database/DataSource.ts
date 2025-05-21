@@ -10,5 +10,5 @@ export default new DataSource({
   database: process.env.DB_DATABASE,
   synchronize: false, // SEM synchronize aqui
   migrations: ['database/migrations/*.ts'],
-  entities: ['src/**/*.entity.ts'],
+  entities: [__dirname + '/../**/*.entity{.js,.ts}'],
 });

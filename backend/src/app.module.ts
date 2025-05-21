@@ -18,19 +18,19 @@ import { ServeStaticModule } from '@nestjs/serve-static';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [],
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false,
-        // !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
-      autoLoadEntities:
-        !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
     }),
     UserModule,
     AuthModule,
     RecordModule,
     StorageModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: join(__dirname, '..', '..', 'uploads'),
       serveRoot: '/uploads', // acessível via http://localhost:3000/uploads/...
+      serveStaticOptions: {
+        index: false,
+      }
     }),
   ],
   providers: [],

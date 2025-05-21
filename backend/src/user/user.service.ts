@@ -15,6 +15,8 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+    console.log('Chegou alguma reqeust', createUserDto);
+    
     const password = await this.hashService.hash(createUserDto.password);
     const user = this.usersRepository.create({ ...createUserDto, password });
 

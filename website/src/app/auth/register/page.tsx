@@ -22,12 +22,12 @@ export default function Register() {
   } = useForm<SignUpApiData>();
 
   async function sendForm(inputs: SignUpApiData) {
-    const data = await signUpApi(inputs);
+    const response = await signUpApi(inputs);
     
-    if (data.statusCode !== 201) {
+    if (response.status !== 201) {
       // show error message default
-      toast.error('Valide os campos');
-      const errorfields: SignUpApiData = indentifierErrorFieldApi(data.message);
+      toast.error(!Array.isArray(response.data) ? response.data : 'Valide os campos');
+      const errorfields: SignUpApiData = indentifierErrorFieldApi(response.data);
       
       (Object.keys(errorfields) as Array<keyof SignUpApiData>).forEach((key) => {
         setError(key, {
@@ -37,7 +37,7 @@ export default function Register() {
       
       return;      
     }
-    toast.success(data.message);
+    toast.success(response.data.message);
     // show success message
     redirect(`/auth/login`)
   }
