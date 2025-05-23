@@ -12,13 +12,14 @@ O **Ion Recording** é uma solução de gravação e gestão de vídeos integrad
 
 ## 📦 Tecnologias utilizadas
 
-- **Backend:** Laravel  
+- **Backend:** NestJs  
 - **Frontend:** Vue 3 (Composition API)  
-- **Plugin:** Electron / JavaScript  
+- **Plugin:** GoogleExtension / JavaScript  
 - **Encoding:** FFmpeg (local) ou AWS MediaConvert (cloud)  
 - **Armazenamento:** AWS S3  
 - **Fila de Jobs:** Express Queue + Redis  
 - **Banco de Dados:** MySQL  
+- **Infraestrutura:** Docker + Docker Compose  
 
 ---
 
@@ -35,19 +36,32 @@ O **Ion Recording** é uma solução de gravação e gestão de vídeos integrad
 
 ## 📊 Fluxo resumido
 
-Plugin → Backend → Armazena vídeo bruto
-↓
-Job Encoding
-↓
-Gera múltiplas versões
-↓
-Salva vídeos otimizados
-↓
-Atualiza status e exibe no frontend
+Plugin → Backend → Armazena vídeo bruto  
+↓  
+Job Encoding  
+↓  
+Gera múltiplas versões  
+↓  
+Salva vídeos otimizados  
+↓  
+Atualiza status e exibe no frontend  
 
-yaml
-Copiar
-Editar
+---
+
+## 🐳 Estrutura com Docker
+
+O projeto utiliza **Docker Compose** para orquestrar os serviços:
+
+- **WEB_SITE:** Frontend (Next.js)
+- **SERVER_API:** Backend (Laravel)
+- **Redis:** Para gerenciamento das filas
+- **MySQL:** Banco de dados
+
+### 📡 Comunicação entre containers
+
+- Requests feitas pelo navegador (client-side) usam `http://localhost:3001`
+- Requests feitas pelo backend (server-side ou middleware) usam `http://server_api:3001`  
+  > Dentro da rede Docker, os serviços se comunicam pelo nome definido no `docker-compose.yml`
 
 ---
 
@@ -55,6 +69,8 @@ Editar
 
 ### 📌 Requisitos
 
+- Docker e Docker Compose  
+**ou**  
 - PHP 8+
 - Composer
 - Node.js
@@ -62,18 +78,14 @@ Editar
 - FFmpeg instalado (para encoding local)
 - MySQL
 
-### 📦 Instalação
+### 📦 Instalação com Docker
 
 ```bash
 git clone https://github.com/seuusuario/ion-recording.git
 cd ion-recording
-composer install
-npm install && npm run dev
-php artisan migrate
-php artisan queue:work
-```
-## 📂 Estrutura do projeto
-```bash
+docker-compose up -d --build
+📂 Estrutura do projeto
+bash
 Copiar
 Editar
 /backend
@@ -81,30 +93,11 @@ Editar
 /plugin
 /storage/raw
 /storage/processed
-```
-## 🛠️ Encoding manual (local)
-Para processar um vídeo:
+/docker-compose.yml
+🛠️ Encoding manual (local)
+Para processar um vídeo via FFmpeg:
 
-```bash
+bash
 Copiar
 Editar
 ffmpeg -i storage/raw/video.mp4 -preset fast -crf 23 -s 1280x720 storage/processed/video-720p.mp4
-```
-
-🤝 Como contribuir
-Fork este repositório
-
-Crie sua branch (git checkout -b feature/nova-feature)
-
-Commit suas alterações (git commit -m 'feat: nova funcionalidade')
-
-Push na sua branch (git push origin feature/nova-feature)
-
-Crie um Pull Request 🚀
-
-## 📑 Licença
-Este projeto está sob a licença MIT.
-
-## 📬 Contato
-Desenvolvido por Ruan
-Email: seuemail@exemplo.com
