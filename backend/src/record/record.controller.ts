@@ -36,8 +36,7 @@ export class RecordController {
     @Req() request: AuthenticatedRequest
   ) {
     const user = request.user;
-    console.log('Chegando chunks');
-    
+
     await this.recordService.createOrUpdate({
       filename,
       index: +index,
@@ -55,7 +54,6 @@ export class RecordController {
     @Body('token') token: string,
     @Req() request: AuthenticatedRequest
   ) {
-    console.log('complete videos');
     const user = request.user;
     const result = await this.storageService.uploadStream(filename);
 
@@ -66,8 +64,6 @@ export class RecordController {
         await this.recordService.update(record.id, {
           filePath: result.path,
         });
-
-        console.log('complete videos uploaded');
 
         return { success: true, message: 'Record uploaded successfully' };
       }

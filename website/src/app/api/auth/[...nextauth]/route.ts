@@ -15,6 +15,7 @@ const handler = NextAuth({
           const { email, password } = credentials as Record<"email"|"password", string>
           
           const result = await loginApi({email, password});
+          
           // If no error and we have user data, return it
           if (result && result.statusCode == 201) {
             const {accessToken} = result; 
@@ -31,8 +32,6 @@ const handler = NextAuth({
     ],
     callbacks: {
       async jwt({ token, user }) {
-        console.log(user);
-        
         if (user) {
           token.id = Number(user.id);
           token.name = user.name

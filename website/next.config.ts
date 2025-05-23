@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
   env: {
-    API_URL: process.env.API_URL,
+    API_URL: process.env.API_URL || "http://localhost:3001",
   },
   images: {
     remotePatterns: [

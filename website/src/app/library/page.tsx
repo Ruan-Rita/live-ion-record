@@ -4,12 +4,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { VideoGrid } from "@/components/video/video-grid"
 import { SERVICE_PLUGIN_ID } from "@/contants"
-import { notifyPluginService } from "@/service/plugin/ServiceWorker"
 import { Search } from "lucide-react"
-import { useSession } from "next-auth/react"
 
 export default function Library() {
-
+    
     function handlNewVideo() {
         window.open(`chrome-extension://${SERVICE_PLUGIN_ID}/index.html`);
     }

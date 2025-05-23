@@ -4,3 +4,6 @@ Dockerfile
 .dockerignore
 npm-debug.log
 .git
+.env
+.env.development
+.env.production
