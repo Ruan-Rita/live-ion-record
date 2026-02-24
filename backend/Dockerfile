@@ -16,14 +16,12 @@ RUN npm ci --include=dev --legacy-peer-deps
 # Copy source code
 COPY . .
 
-RUN chmod +x ./entrypoint.sh
-
 # RUN npm install -g @nestjs/cli
-    
+
 # Creates a "dist" folder with the production build
-RUN npm run build 
+RUN npm run build
 
 # Expose the desired port (e.g., 3001)
 EXPOSE 3001
 
-CMD ["./entrypoint.sh"]
+CMD ["/bin/sh", "-c", "npm run migration && node dist/src/main"]
