@@ -1,103 +1,129 @@
-# 🎥 Ion Recording
+# Ion Recording
 
-Sistema completo de gravação, armazenamento e entrega de vídeos otimizados, com encoding multi-qualidade e integração via plugin.
-
----
-
-## 📖 Sobre o projeto
-
-O **Ion Recording** é uma solução de gravação e gestão de vídeos integrada com backend, frontend e plugin de captura. Ele permite que usuários gravem vídeos via navegador ou aplicação desktop, armazene vídeos brutos, realize o encoding automático para múltiplas qualidades e disponibilize os arquivos otimizados para reprodução online.
+Sistema completo de gravação, armazenamento e entrega de vídeos, com integração via plugin de navegador.
 
 ---
 
-## 📦 Tecnologias utilizadas
+## Sobre o projeto
 
-- **Backend:** NestJs  
-- **Frontend:** Vue 3 (Composition API)  
-- **Plugin:** GoogleExtension / JavaScript  
-- **Encoding:** FFmpeg (local) ou AWS MediaConvert (cloud)  
-- **Armazenamento:** AWS S3  
-- **Fila de Jobs:** Express Queue + Redis  
-- **Banco de Dados:** MySQL  
-- **Infraestrutura:** Docker + Docker Compose  
+O **Ion Recording** é uma solução de gravação e gestão de vídeos integrada com backend, frontend e plugin de captura. Permite que usuários gravem vídeos via navegador, armazene os arquivos e os disponibilize para reprodução online.
 
 ---
 
-## 🎛️ Como funciona
+## Tecnologias
 
-1. O plugin grava o vídeo e envia para o backend.
-2. O backend armazena o vídeo bruto.
-3. Um job de encoding é disparado via fila.
-4. O vídeo é processado para gerar múltiplas versões (ex.: 1080p, 720p, 480p).
-5. Os vídeos otimizados são armazenados e o status é atualizado.
-6. O frontend exibe os vídeos disponíveis para reprodução com seleção de qualidade.
-
----
-
-## 📊 Fluxo resumido
-
-Plugin → Backend → Armazena vídeo bruto  
-↓  
-Job Encoding  
-↓  
-Gera múltiplas versões  
-↓  
-Salva vídeos otimizados  
-↓  
-Atualiza status e exibe no frontend  
+- **Backend:** NestJS
+- **Frontend:** Next.js
+- **Plugin:** Chrome Extension / JavaScript
+- **Armazenamento:** Local ou AWS S3
+- **Banco de Dados:** PostgreSQL
+- **Infraestrutura:** Docker + Docker Compose
 
 ---
 
-## 🐳 Estrutura com Docker
+## Como rodar
 
-O projeto utiliza **Docker Compose** para orquestrar os serviços:
+### Pré-requisitos
 
-- **WEB_SITE:** Frontend (Next.js)
-- **SERVER_API:** Backend (Laravel)
-- **Redis:** Para gerenciamento das filas
-- **MySQL:** Banco de dados
+- [Docker](https://www.docker.com/) e Docker Compose
 
-### 📡 Comunicação entre containers
-
-- Requests feitas pelo navegador (client-side) usam `http://localhost:3001`
-- Requests feitas pelo backend (server-side ou middleware) usam `http://server_api:3001`  
-  > Dentro da rede Docker, os serviços se comunicam pelo nome definido no `docker-compose.yml`
-
----
-
-## 🚀 Como rodar o projeto
-
-### 📌 Requisitos
-
-- Docker e Docker Compose  
-**ou**  
-- PHP 8+
-- Composer
-- Node.js
-- Redis (para filas)
-- FFmpeg instalado (para encoding local)
-- MySQL
-
-### 📦 Instalação com Docker
+### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seuusuario/ion-recording.git
-cd ion-recording
-docker-compose up -d --build
-📂 Estrutura do projeto
-bash
-Copiar
-Editar
-/backend
-/frontend
-/plugin
-/storage/raw
-/storage/processed
-/docker-compose.yml
-🛠️ Encoding manual (local)
-Para processar um vídeo via FFmpeg:
+git clone https://github.com/seuusuario/live-ion-record.git
+cd live-ion-record
+```
 
-bash
-Copiar
-Editar
-ffmpeg -i storage/raw/video.mp4 -preset fast -crf 23 -s 1280x720 storage/processed/video-720p.mp4
+### 2. Configure as variáveis de ambiente
+
+O projeto usa arquivos `.env` separados por ambiente. Copie o arquivo de exemplo e ajuste os valores:
+
+```bash
+# Para desenvolvimento
+cp .env.dev .env.dev.local   # opcional: personalize sem commitar
+
+# Para produção
+cp .env.prod .env.prod.local
+```
+
+> As chaves JWT já vêm preenchidas nos arquivos de exemplo. Em produção, gere novas chaves.
+
+---
+
+### Desenvolvimento (hot reload)
+
+Sobe o backend e o banco. O NestJS recarrega automaticamente ao salvar arquivos em `backend/src/`.
+
+```bash
+docker compose -f compose.yaml -f compose.dev.yaml --env-file .env.dev up -d
+```
+
+Para subir também o frontend:
+
+```bash
+docker compose -f compose.yaml -f compose.dev.yaml --env-file .env.dev up -d server_api website db_app
+```
+
+| Serviço    | URL                    |
+|------------|------------------------|
+| Backend    | http://localhost:3001  |
+| Frontend   | http://localhost:3000  |
+| PostgreSQL | localhost:5432         |
+
+---
+
+### Produção
+
+Faz o build das imagens e sobe todos os serviços.
+
+```bash
+docker compose -f compose.yaml -f compose.prod.yaml --env-file .env.prod up -d --build
+```
+
+| Serviço    | URL                   |
+|------------|-----------------------|
+| Frontend   | http://localhost:3000 |
+| Backend    | http://localhost:3001 |
+
+---
+
+### Comandos úteis
+
+```bash
+# Ver logs de um serviço
+docker compose -f compose.yaml -f compose.dev.yaml logs -f server_api
+
+# Parar tudo
+docker compose -f compose.yaml -f compose.dev.yaml down
+
+# Rebuild de um serviço específico
+docker compose -f compose.yaml -f compose.prod.yaml --env-file .env.prod up -d --build server_api
+```
+
+---
+
+## Estrutura do projeto
+
+```
+live-ion-record/
+├── compose.yaml          # base: databases, network, volumes
+├── compose.dev.yaml      # dev: hot reload, volumes de código
+├── compose.prod.yaml     # prod: build das imagens
+├── .env.dev              # variáveis de desenvolvimento
+├── .env.prod             # variáveis de produção
+├── backend/              # API NestJS
+│   ├── Dockerfile        # imagem de produção
+│   └── Dockerfile.dev    # imagem de desenvolvimento
+└── website/              # Frontend Next.js
+    ├── Dockerfile        # imagem de produção
+    └── Dockerfile.dev    # imagem de desenvolvimento
+```
+
+---
+
+## Comunicação entre containers
+
+- Requests do **navegador** usam `http://localhost:3001`
+- Requests do **servidor Next.js** (server-side) usam `http://server_api:3001`
+
+> Dentro da rede Docker os serviços se comunicam pelo nome definido no compose.
