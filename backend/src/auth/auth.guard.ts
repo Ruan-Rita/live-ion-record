@@ -36,7 +36,10 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
+    console.log(`[AuthGuard] ${request.method} ${request.url} | token: ${token ? token.substring(0, 20) + '...' : 'AUSENTE'}`);
+
     if (!token) {
+      console.log('[AuthGuard] REJEITADO: token ausente no header');
       throw new UnauthorizedException();
     }
 
@@ -44,14 +47,18 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: this.jwtConfiguration.secret,
       });
+      console.log(`[AuthGuard] Token válido | sub: ${payload.sub} | exp: ${new Date(payload.exp * 1000).toISOString()}`);
+
       const user = await this.userService.findOne(payload.sub);
 
       if (!user) {
+        console.log(`[AuthGuard] REJEITADO: usuário ${payload.sub} não encontrado`);
         throw new UnauthorizedException();
       }
 
       request['user'] = user;
-    } catch {
+    } catch (err) {
+      console.log(`[AuthGuard] REJEITADO: ${err.message}`);
       throw new UnauthorizedException();
     }
 

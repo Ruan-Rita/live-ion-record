@@ -1,14 +1,40 @@
 let pinnedTabId = null;
+let pendingRecordingStart = false;
+
+function isTokenExpired(token) {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.exp * 1000 < Date.now();
+    } catch {
+        return true;
+    }
+}
+
+function openPinnedTab(sendResponse) {
+    chrome.tabs.create({
+        url: chrome.runtime.getURL("pinned.html"),
+        pinned: true,
+        active: true
+    }, (tab) => {
+        pinnedTabId = tab.id;
+        if (sendResponse) sendResponse({ success: true, tabId: tab.id });
+    });
+}
 
 /**
  * Listeners
  */
 chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
     if (message.type === "AUTH_TOKEN") {
-        console.log("Token salvo da sessão do site! token: ", message.data);
+        console.log("Token recebido, salvando...");
 
         chrome.storage.local.set({ ion_token: message.data }, () => {
-            console.log("Token salvo no plugin! token: " + message.data);
+            console.log("Token salvo no plugin!");
+
+            if (pendingRecordingStart) {
+                pendingRecordingStart = false;
+                openPinnedTab(null);
+            }
         });
     }
 });
@@ -32,13 +58,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('Mensagem recebida:', message);
 
     if (message.action === "openPinnedTab") {
-        chrome.tabs.create({
-            url: chrome.runtime.getURL("pinned.html"),
-            pinned: true,
-            active: true
-        }, (tab) => {
-            pinnedTabId = tab.id;
-            sendResponse({ success: true, tabId: tab.id });
+        chrome.storage.local.get("ion_token", (result) => {
+            const token = result.ion_token;
+
+            if (token && !isTokenExpired(token)) {
+                openPinnedTab(sendResponse);
+            } else {
+                console.log("Token expirado ou ausente, reabrindo /plugin para renovar...");
+                pendingRecordingStart = true;
+                chrome.tabs.create({ url: "http://localhost:3000/plugin", active: true });
+                sendResponse({ success: false, needsAuth: true });
+            }
         });
 
         return true; // Mantém a conexão assíncrona aberta

@@ -31,13 +31,13 @@ window.addEventListener("message", (event) => {
 if (true) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const currentTabId = tabs[0].id;
-    
+
         chrome.tabs.create({
-            url: "http://localhost:3000/auth/plugin",
+            url: "http://localhost:3000/plugin",
             active: false, // Não traz a aba pro foco
         }, (newTab) => {
             // Aguarda autenticação (você pode escutar ou usar chrome.runtime.onMessage)
-    
+
             // Depois de um tempo, volta para a aba original (se quiser):
             chrome.tabs.update(currentTabId, { active: true });
             setTimeout(() => {

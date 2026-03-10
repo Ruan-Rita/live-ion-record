@@ -7,7 +7,7 @@ import { signOut } from 'next-auth/react';
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
   const loginUrl = new URL("/auth/login", request.url);
-  
+
   if (!token) {
     return NextResponse.redirect(loginUrl);
   }
@@ -31,6 +31,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|auth|images|$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|auth|plugin|images|$).*)',
   ],
 };

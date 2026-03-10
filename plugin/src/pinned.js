@@ -1,7 +1,7 @@
 const apiDomain = 'http://localhost:3001';
 let mediaRecorder;
-let recordedChunks = [];
 let chunkIndex = 0;
+const pendingUploads = [];
 const uuid = crypto.randomUUID();
 
 const uploadChunk = async (formData, token) => {
@@ -38,34 +38,35 @@ document.addEventListener("DOMContentLoaded", async () => {
         mediaRecorder = new MediaRecorder(stream, options);
 
         // Collect chunks of recorded data
-        mediaRecorder.ondataavailable = async (event) => {            
+        mediaRecorder.ondataavailable = (event) => {
             if (event.data.size > 0) {
                 const formData = new FormData();
                 formData.append('chunk', event.data);
                 formData.append('index', chunkIndex++);
                 formData.append('token', uuid);
-                formData.append('filename', 'video.webm'); // Add the filename to identify the file on the server
-      
-                chrome.storage.local.get("ion_token", async (result) => {
-                    const token = result.ion_token;
-                    await uploadChunk(formData, token);
-                });
+                formData.append('filename', 'video.webm');
 
-                recordedChunks.push(event.data);
+                const uploadPromise = new Promise((resolve) => {
+                    chrome.storage.local.get("ion_token", async (result) => {
+                        await uploadChunk(formData, result.ion_token);
+                        resolve();
+                    });
+                });
+                pendingUploads.push(uploadPromise);
             }
         };
 
         // Handle when recording stops
-        mediaRecorder.onstop = () => {
-            // Stop the recording
+        mediaRecorder.onstop = async () => {
             chrome.runtime.sendMessage({ action: "recordingStopped" });
-            // Stop all tracks to release the screen capture
             mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+            stream.getTracks().forEach((track) => track.stop());
+
+            await Promise.all(pendingUploads);
 
             chrome.storage.local.get("ion_token", async (result) => {
                 const token = result.ion_token;
-                
-                // Notify server that the upload is complete
+
                 fetch(`${apiDomain}/record/complete`, {
                     method: 'POST',
                     body: JSON.stringify({ filename: 'video.webm', token: uuid }),
@@ -77,15 +78,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                         }
                     });
                 }).catch(err => {
-                    console.error("Error close pinned tab:", err);
+                    console.error("Error ao chamar /complete:", err);
                 });
             });
-
-            if (stream) {
-                stream.getTracks().forEach((track) => track.stop());
-            }
-            
-            stream = null;
         };
 
         // Start recording

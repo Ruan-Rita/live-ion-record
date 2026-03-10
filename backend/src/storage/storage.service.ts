@@ -61,7 +61,11 @@ export class StorageService {
     // Read and concatenate all chunks in order
     const chunkFiles = fs
       .readdirSync(pathToFiles)
-      .sort((a, b) => parseInt(a) - parseInt(b));
+      .sort((a, b) => {
+        const indexA = parseInt(a.match(/\d+/)?.[0] ?? '0');
+        const indexB = parseInt(b.match(/\d+/)?.[0] ?? '0');
+        return indexA - indexB;
+      });
 
     const writeStream = fs.createWriteStream(outputFile);
 

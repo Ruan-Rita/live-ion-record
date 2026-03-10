@@ -5,6 +5,6 @@ export default registerAs('jwtConfig', () => ({
   privateKey: process.env.JWT_PRIVATE_KEY,
   publicKey: process.env.JWT_PUBLIC_KEY,
   signOptions: {
-    expiresIn: '7200s', // 2 hours => 2 * 60 * 60
+    expiresIn: '7d',
   },
 }));
