@@ -1,41 +1,78 @@
-import { useEffect, useState } from "react";
-import { VideoCard } from "./video-card"
+'use client'
+
+import { useEffect, useState, useCallback } from "react";
+import { VideoCard } from "./video-card";
 import { useSession } from "next-auth/react";
 import { listRecordsApi } from "@/service/record";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Video } from "lucide-react";
 
-// This is sample data. Replace it with your actual data fetching logic.
-
-const img = 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/594650/ss_1440bf64dfd9cac71a607230cc972fc6e43419a1.1920x1080.jpg?t=1737651636';
-const img2 = 'https://conteudo.imguol.com.br/c/entretenimento/2a/2021/02/01/subnautica-below-zero-1612200254274_v2_900x506.jpg'
-const videos = [
-  { id: "1", title: "Introduction to Our SaaS", thumbnail: img, duration: "5:30" },
-  { id: "2", title: "How to Use Feature X", thumbnail: img2, duration: "3:45" },
-  { id: "3", title: "Advanced Tips and Tricks", thumbnail: img, duration: "7:15" },
-  { id: "4", title: "Troubleshooting Common Issues", thumbnail: img2, duration: "6:20" },
-  { id: "5", title: "Integrating with Third-party Tools", thumbnail: img, duration: "8:10" },
-  { id: "6", title: "Optimizing Your Workflow", thumbnail: img2, duration: "4:55" },
-]
-
-export function VideoGrid() {
-  const [videos, setVideos] = useState<any[]>([]);
-  const { data: sessionData } = useSession()
-
-  useEffect(() => {
-    if (sessionData?.user?.accessToken) {
-      fetchVideos();
-    }
-  }, [sessionData]);
-
-  const fetchVideos = async () => {
-    const response = await listRecordsApi(sessionData?.user?.accessToken);
-    setVideos(response);
-  };
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {videos.length > 0 && videos.map((video) => (
-        <VideoCard key={video.id} video={video}/>
-      ))}
-    </div>
-  )
+interface VideoGridProps {
+    search?: string;
 }
 
+export function VideoGrid({ search = '' }: VideoGridProps) {
+    const [videos, setVideos] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const { data: sessionData } = useSession();
+
+    const fetchVideos = useCallback(async (name?: string) => {
+        if (!sessionData?.user?.accessToken) return;
+        setLoading(true);
+        const response = await listRecordsApi(sessionData.user.accessToken, name);
+        setVideos(Array.isArray(response) ? response : []);
+        setLoading(false);
+    }, [sessionData]);
+
+    useEffect(() => {
+        fetchVideos();
+    }, [fetchVideos]);
+
+    useEffect(() => {
+        if (!sessionData?.user?.accessToken) return;
+        const timer = setTimeout(() => {
+            fetchVideos(search || undefined);
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [search, fetchVideos, sessionData]);
+
+    if (loading) {
+        return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="rounded-xl overflow-hidden border border-gray-100">
+                        <Skeleton className="aspect-video w-full" />
+                        <div className="p-3 space-y-2">
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-3 w-1/3" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    if (videos.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+                <div className="rounded-full bg-purple-50 p-6 mb-4">
+                    <Video className="h-10 w-10 text-purple-300" />
+                </div>
+                <h3 className="text-base font-medium text-gray-800 mb-1">
+                    {search ? 'No videos found' : 'No recordings yet'}
+                </h3>
+                <p className="text-sm text-gray-400">
+                    {search ? `No results for "${search}"` : 'Click "New Recording" to get started.'}
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {videos.map((video) => (
+                <VideoCard key={video.id} video={video} />
+            ))}
+        </div>
+    );
+}

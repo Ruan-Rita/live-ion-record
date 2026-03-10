@@ -3,7 +3,7 @@ import { CreateRecordDto } from './dto/create-record.dto';
 import { UpdateRecordDto } from './dto/update-record.dto';
 import { CreateOrUpdateRecordDto } from './dto/create-or-update-record.dto';
 import { StorageService } from 'src/storage/storage.service';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Record } from './entities/record.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
@@ -28,14 +28,14 @@ export class RecordService {
     });
 
     const record = await this.findOne(token, userId);
-    
+
     if (record) {
       if (record.name !== filename) {
         return this.update(record.id, {
           name: filename,
         });
       }
-      
+
       return record;
     }
 
@@ -71,8 +71,14 @@ export class RecordService {
     return this.recordRepository.save({ ...createRecordDto, user });
   }
 
-  async findAll(userId: number) {
-    return this.recordRepository.find({ where: { user: { id: userId } } });
+  async findAll(userId: number, name?: string) {
+    return this.recordRepository.find({
+      where: {
+        user: { id: userId },
+        ...(name ? { name: ILike(`%${name}%`) } : {}),
+      },
+      order: { createdAt: 'DESC' },
+    });
   }
 
   update(id: number, updateRecordDto: UpdateRecordDto) {

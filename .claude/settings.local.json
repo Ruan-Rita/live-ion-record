@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(cmd /c \"dir C:\\\\Projects\\\\live-ion-record /b\")",
+      "Bash(cmd /c dir \"C:\\\\Projects\\\\live-ion-record\" /b)"
+    ]
+  }
+}

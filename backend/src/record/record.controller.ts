@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Req,
+  Query,
   NotFoundException,
 } from '@nestjs/common';
 import { RecordService } from './record.service';
@@ -75,9 +76,9 @@ export class RecordController {
   }
 
   @Get('list')
-  async listRecords(@Req() request: AuthenticatedRequest) {
+  async listRecords(@Req() request: AuthenticatedRequest, @Query('name') name?: string) {
     const user = request.user;
-    const results = await this.recordService.findAll(user.id);
+    const results = await this.recordService.findAll(user.id, name);
     
     return results.map(result => ({
       ...result,

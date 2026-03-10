@@ -1,50 +1,69 @@
-import Image from "next/image"
-import { Play } from "lucide-react"
+'use client'
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useRef } from "react"
+import { Play } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface Video {
-  id: string
-  name: string
-  filePath: string
-  url: string
-  token: string
-  duration: string
+    id: string
+    name: string
+    filePath: string
+    url: string
+    token: string
+    createdAt?: string
 }
 
-interface VideoCardProps {
-  video: Video
-}
+export function VideoCard({ video }: { video: Video }) {
+    const router = useRouter();
+    const videoRef = useRef<HTMLVideoElement>(null);
 
-export function VideoCard({ video }: VideoCardProps) {
-  const router = useRouter();
+    function handleClick() {
+        router.push(`/library/${video.token}`);
+    }
 
-  function handlePlay(videoId: string) {
-    router.push(`/library/${videoId}`);
-  }
+    function handleMouseEnter() {
+        videoRef.current?.play().catch(() => {});
+    }
 
-  return (
-    <Card className="overflow-hidden">
-      <CardHeader className="p-0">
-        <div className="relative aspect-video">
-          <video id={video.id} src={video.url} controls style={{ width: "100%", height: "100%" }} />
-          <div onClick={() => handlePlay(video.token)} className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 opacity-0 hover:opacity-100 transition-opacity">
-            <Play className="h-12 w-12 text-white cursor-pointer"/>
-          </div>
+    function handleMouseLeave() {
+        const v = videoRef.current;
+        if (v) {
+            v.pause();
+            v.currentTime = 0;
+        }
+    }
+
+    const formattedDate = video.createdAt
+        ? new Date(video.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+        : '';
+
+    return (
+        <div
+            className="group cursor-pointer rounded-xl overflow-hidden border border-gray-100 hover:border-purple-200 hover:shadow-md transition-all duration-200 bg-white"
+            onClick={handleClick}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
+            <div className="relative aspect-video bg-gray-900 overflow-hidden">
+                <video
+                    ref={videoRef}
+                    src={video.url}
+                    muted
+                    preload="metadata"
+                    className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="bg-white/90 rounded-full p-3 shadow-lg">
+                        <Play className="h-5 w-5 text-purple-700 fill-purple-700" />
+                    </div>
+                </div>
+            </div>
+            <div className="p-3">
+                <h3 className="font-medium text-sm truncate text-gray-900">{video.name}</h3>
+                {formattedDate && (
+                    <p className="text-xs text-gray-400 mt-0.5">{formattedDate}</p>
+                )}
+            </div>
         </div>
-      </CardHeader>
-      <CardContent className="p-4">
-        <CardTitle className="text-lg truncate">{video.name}</CardTitle>
-      </CardContent>
-      <CardFooter className="p-4 pt-0 flex justify-between items-center">
-        <span className="text-sm text-muted-foreground">{video.duration}</span>
-        <Button variant="outline" size="sm" onClick={() => handlePlay(video.token)}>
-          Watch Now
-        </Button>
-      </CardFooter>
-    </Card>
-  )
+    );
 }
-
