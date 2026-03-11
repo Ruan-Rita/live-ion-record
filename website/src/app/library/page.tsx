@@ -10,8 +10,16 @@ import { Search, Video } from "lucide-react"
 export default function Library() {
     const [search, setSearch] = useState('')
 
-    function handleNewVideo() {
-        window.open(`chrome-extension://${SERVICE_PLUGIN_ID}/index.html`);
+    async function handleNewRecording() {
+        if (typeof window.chrome?.runtime === 'undefined' || !SERVICE_PLUGIN_ID) {
+            window.open(`chrome-extension://${SERVICE_PLUGIN_ID}/index.html`)
+            return
+        }
+        try {
+            await window.chrome.runtime.sendMessage(SERVICE_PLUGIN_ID, { action: "openPinnedTab" })
+        } catch {
+            window.open(`chrome-extension://${SERVICE_PLUGIN_ID}/index.html`)
+        }
     }
 
     return (
@@ -22,11 +30,11 @@ export default function Library() {
                     <h1 className="text-3xl font-bold tracking-tight">Videos</h1>
                 </div>
                 <Button
-                    className="text-white gap-2"
+                    className="gap-2 text-white"
                     style={{ background: 'linear-gradient(90deg, #7c24d9, #4a03b8)' }}
-                    onClick={handleNewVideo}
+                    onClick={handleNewRecording}
                 >
-                    <Video className="h-4 w-4" />
+                    <Video className="h-4 w-4" style={{ color: 'white' }} />
                     New Recording
                 </Button>
             </div>

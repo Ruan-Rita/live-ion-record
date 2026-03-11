@@ -10,5 +10,6 @@ cpSync('pinned.html', 'dist/pinned.html');
 cpSync('src/popup.js', 'dist/src/popup.js');
 cpSync('src/background.js', 'dist/src/background.js');
 cpSync('src/pinned.js', 'dist/src/pinned.js');
+cpSync('src/content-modal.js', 'dist/src/content-modal.js');
 
 console.log('✅ Arquivos copiados com sucesso!');

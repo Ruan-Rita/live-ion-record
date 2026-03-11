@@ -28,11 +28,13 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ${AWS_REGION}
       AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
+    command: sh -c "npm run migration && npm run start:dev"
     volumes:
       - ./backend:/app
       - /app/node_modules
     depends_on:
-      - db_app
+      db_app:
+        condition: service_healthy
     networks:
       - app-network
 

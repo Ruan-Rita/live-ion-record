@@ -24,6 +24,22 @@ function openPinnedTab(sendResponse) {
 /**
  * Listeners
  */
+chrome.action.onClicked.addListener((tab) => {
+    chrome.storage.local.get("ion_token", (result) => {
+        const token = result.ion_token;
+
+        if (token && !isTokenExpired(token)) {
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['src/content-modal.js']
+            });
+        } else {
+            pendingRecordingStart = true;
+            chrome.tabs.create({ url: 'http://localhost:3000/plugin', active: true });
+        }
+    });
+});
+
 chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
     if (message.type === "AUTH_TOKEN") {
         console.log("Token recebido, salvando...");
@@ -36,6 +52,26 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
                 openPinnedTab(null);
             }
         });
+    }
+
+    if (message.action === "openPinnedTab") {
+        chrome.storage.local.get("ion_token", (result) => {
+            const token = result.ion_token;
+
+            if (token && !isTokenExpired(token)) {
+                chrome.scripting.executeScript({
+                    target: { tabId: sender.tab.id },
+                    files: ['src/content-modal.js']
+                });
+                sendResponse({ success: true });
+            } else {
+                pendingRecordingStart = true;
+                chrome.tabs.create({ url: `${sender.origin}/plugin`, active: true });
+                sendResponse({ success: false, needsAuth: true });
+            }
+        });
+
+        return true;
     }
 });
 

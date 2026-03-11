@@ -3,16 +3,6 @@ import { notifyPluginService } from "@/service/plugin/ServiceWorker";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 
-// Add type declaration for chrome object
-declare global {
-    interface Window {
-        chrome?: {
-            runtime: {
-                sendMessage: (id:string, message: any) => void;
-            };
-        };
-    }
-}
 
 export default function AuthPlugin() {
 
