@@ -42,13 +42,21 @@ export default function VideoPage() {
 
             {video ? (
                 <>
-                    <h1 className="text-xl font-semibold text-gray-900 mb-4">{video.name}</h1>
+                    <div className="flex items-baseline justify-between mb-4">
+                        <h1 className="text-xl font-semibold text-gray-900">{video.name}</h1>
+                        {video.duration != null && (
+                            <span className="text-sm text-gray-400 ml-4 shrink-0">
+                                {Math.floor(video.duration / 60)}:{String(Math.floor(video.duration % 60)).padStart(2, '0')}
+                            </span>
+                        )}
+                    </div>
                     <div className="rounded-xl overflow-hidden bg-gray-900 shadow-lg">
                         <video
                             ref={videoRef}
                             src={video.url}
                             controls
                             autoPlay
+                            preload="metadata"
                             className="w-full"
                         />
                     </div>

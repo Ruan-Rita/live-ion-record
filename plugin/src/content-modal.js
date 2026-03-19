@@ -8,6 +8,11 @@ let ionChunkIndex = 0;
 const ionPendingUploads = [];
 const ionUuid = crypto.randomUUID();
 
+// Shared timing state between overlay and recording
+let ionRecordingStartTime = 0;
+let ionPausedMs = 0;       // total ms spent paused
+let ionPauseStartTime = 0; // timestamp when current pause began
+
 async function ionUploadChunk(formData, token) {
     try {
         const response = await fetch(`${ION_API_DOMAIN}/record/upload-chunks`, {
@@ -63,27 +68,31 @@ function ionInjectRecordingOverlay() {
 
     document.body.appendChild(overlay);
 
-    let startTime = Date.now();
-    let timerInterval;
-    let isRecording = true;
-    let pausedTime = 0;
-    let totalPausedTime = 0;
+    let isPaused = false;
     let showMs = false;
+    let lastText = '';
 
     function updateTimer() {
-        if (!isRecording) return;
-        const elapsed = Date.now() - startTime - totalPausedTime;
-        const s = Math.floor(elapsed / 1000);
-        const m = Math.floor(s / 60);
-        const rs = s % 60;
-        const ms = Math.floor((elapsed % 1000) / 10);
-        const el = document.getElementById('ion-timer');
-        if (el) el.textContent = showMs
-            ? `${m}:${String(rs).padStart(2,'0')}.${String(ms).padStart(2,'0')}`
-            : `${m}:${String(rs).padStart(2,'0')}`;
+        if (isPaused) return;
+        const elapsed = Date.now() - ionRecordingStartTime - ionPausedMs;
+        const totalSec = Math.floor(elapsed / 1000);
+        const m = Math.floor(totalSec / 60);
+        const s = totalSec % 60;
+        const cs = Math.floor((elapsed % 1000) / 10);
+        const text = showMs
+            ? `${m}:${String(s).padStart(2, '0')}.${String(cs).padStart(2, '0')}`
+            : `${m}:${String(s).padStart(2, '0')}`;
+
+        // Only touch the DOM when the displayed value actually changes
+        if (text !== lastText) {
+            lastText = text;
+            const el = document.getElementById('ion-timer');
+            if (el) el.textContent = text;
+        }
     }
 
-    timerInterval = setInterval(updateTimer, 10);
+    // 100ms interval: smooth enough for centiseconds, no flickering for seconds
+    const timerInterval = setInterval(updateTimer, 100);
 
     document.getElementById('ion-timer').addEventListener('click', () => {
         showMs = !showMs;
@@ -111,17 +120,14 @@ function ionInjectRecordingOverlay() {
 
     document.getElementById('ion-pause-btn').addEventListener('click', () => {
         const statusEl = document.getElementById('ion-rec-status');
-        if (isRecording) {
-            isRecording = false;
-            pausedTime = Date.now() - startTime;
-            totalPausedTime += pausedTime;
-            clearInterval(timerInterval);
+        if (!isPaused) {
+            isPaused = true;
+            ionPauseStartTime = Date.now();
             if (ionMediaRecorder && ionMediaRecorder.state === 'recording') ionMediaRecorder.pause();
             if (statusEl) { statusEl.textContent = 'PAUSED'; statusEl.style.color = '#FF9800'; statusEl.style.animation = 'none'; }
         } else {
-            isRecording = true;
-            startTime = Date.now() - pausedTime;
-            timerInterval = setInterval(updateTimer, 10);
+            isPaused = false;
+            ionPausedMs += Date.now() - ionPauseStartTime;
             if (ionMediaRecorder && ionMediaRecorder.state === 'paused') ionMediaRecorder.resume();
             if (statusEl) { statusEl.textContent = 'REC'; statusEl.style.color = '#4CAF50'; statusEl.style.animation = 'ion-pulse 1s infinite'; }
         }
@@ -133,6 +139,8 @@ async function ionStartRecording() {
         const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
 
         ionInjectRecordingOverlay();
+
+        ionRecordingStartTime = Date.now();
 
         ionMediaRecorder = new MediaRecorder(stream, {
             mimeType: 'video/webm; codecs=vp9',
@@ -161,11 +169,14 @@ async function ionStartRecording() {
             stream.getTracks().forEach(t => t.stop());
             await Promise.all(ionPendingUploads);
 
+            // Duration calculated client-side: exact, no ffprobe needed
+            const duration = Math.round((Date.now() - ionRecordingStartTime - ionPausedMs) / 10) / 100;
+
             chrome.storage.local.get("ion_token", async (result) => {
                 try {
                     await fetch(`${ION_API_DOMAIN}/record/complete`, {
                         method: 'POST',
-                        body: JSON.stringify({ filename: 'video.webm', token: ionUuid }),
+                        body: JSON.stringify({ filename: 'video.webm', token: ionUuid, duration }),
                         headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${result.ion_token}` },
                     });
                 } catch (err) {
@@ -188,7 +199,6 @@ async function ionStartRecording() {
 }
 
 function injectStartModal() {
-
     const overlay = document.createElement('div');
     overlay.id = 'ion-start-modal';
     overlay.style.cssText = `

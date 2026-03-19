@@ -25,6 +25,12 @@ export class Record {
   @Column()
   filePath: string;
 
+  @Column({ nullable: true })
+  thumbnailPath?: string;
+
+  @Column('decimal', { precision: 10, scale: 3, nullable: true })
+  duration?: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

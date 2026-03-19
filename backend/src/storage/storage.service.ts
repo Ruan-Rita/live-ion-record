@@ -5,12 +5,18 @@ import { UploadOptions } from './interfaces/upload-options.interface';
 import * as fs from 'fs';
 import * as path from 'path';
 import { dateNowString } from 'src/helper';
+import * as ffmpeg from 'fluent-ffmpeg';
+import * as ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
+import * as ffprobeInstaller from '@ffprobe-installer/ffprobe';
+
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+ffmpeg.setFfprobePath(ffprobeInstaller.path);
 
 @Injectable()
 export class StorageService {
   constructor(
     @Inject('STORAGE_STRATEGY') private storageStrategy: StorageStrategy,
-    private readonly storageLocal: LocalStorageStrategy,
+    readonly storageLocal: LocalStorageStrategy,
   ) {}
 
   upload(file: Express.Multer.File, options?: any): Promise<string> {
@@ -114,5 +120,27 @@ export class StorageService {
       message: 'File uploaded successfully',
       path: finalName,
     };
+  }
+
+  async processVideo(videoPath: string): Promise<{ thumbnailPath: string }> {
+    const thumbnailDir = path.join(this.storageLocal.disk, 'thumbnails');
+    await fs.promises.mkdir(thumbnailDir, { recursive: true });
+
+    const videoBasename = path.basename(videoPath, path.extname(videoPath));
+    const thumbnailName = `${videoBasename}.jpg`;
+
+    await new Promise<void>((resolve, reject) => {
+      ffmpeg(videoPath)
+        .screenshots({
+          timestamps: ['00:00:01.000'],
+          filename: thumbnailName,
+          folder: thumbnailDir,
+          size: '640x?',
+        })
+        .on('end', () => resolve())
+        .on('error', (err) => reject(err));
+    });
+
+    return { thumbnailPath: thumbnailName };
   }
 }

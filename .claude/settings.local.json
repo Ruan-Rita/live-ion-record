@@ -4,7 +4,20 @@
       "Bash(dir:*)",
       "Bash(findstr:*)",
       "Bash(cmd /c \"dir C:\\\\Projects\\\\live-ion-record /b\")",
-      "Bash(cmd /c dir \"C:\\\\Projects\\\\live-ion-record\" /b)"
+      "Bash(cmd /c dir \"C:\\\\Projects\\\\live-ion-record\" /b)",
+      "Bash(cd /home/ruanr/ruan/live-ion-record && docker compose -f compose.yaml -f compose.dev.yaml restart 2>&1)",
+      "Bash(cd /home/ruanr/ruan/live-ion-record/plugin && npm run build 2>&1)",
+      "Bash(npm run:*)",
+      "Bash(git add:*)",
+      "Bash(docker exec:*)",
+      "Bash(cd /home/ruanr/ruan/live-ion-record/backend && npm install fluent-ffmpeg @ffmpeg-installer/ffmpeg @ffprobe-installer/ffprobe --legacy-peer-deps 2>&1 | tail -5)",
+      "Bash(xargs grep -l \"duration\\\\|thumbnailUrl\\\\|library\")",
+      "Bash(git -C /home/ruanr/ruan/live-ion-record status --short)",
+      "Bash(git -C /home/ruanr/ruan/live-ion-record log --oneline -3)",
+      "Bash(chmod -R u+w .git/objects)",
+      "Bash(wsl.exe -e bash -c \"cd /home/ruanr/ruan/live-ion-record && git add backend/package.json backend/package-lock.json backend/src/record/dto/update-record.dto.ts backend/src/record/entities/record.entity.ts backend/src/record/record.controller.ts backend/src/storage/storage.service.ts backend/database/migrations/1747672800000-add-thumbnail-duration.ts plugin/src/content-modal.js website/src/app/library/[videoId]/page.tsx website/src/components/video/video-card.tsx ION_PRODUCT.md && git status --short\")",
+      "Bash(wsl.exe -d Ubuntu -- git -C /home/ruanr/ruan/live-ion-record add backend/package.json backend/package-lock.json backend/src/record/dto/update-record.dto.ts backend/src/record/entities/record.entity.ts backend/src/record/record.controller.ts backend/src/storage/storage.service.ts backend/database/migrations/1747672800000-add-thumbnail-duration.ts plugin/src/content-modal.js \"website/src/app/library/[videoId]/page.tsx\" website/src/components/video/video-card.tsx ION_PRODUCT.md)",
+      "Bash(wsl.exe -d Ubuntu -- git -C /home/ruanr/ruan/live-ion-record status --short)"
     ]
   }
 }

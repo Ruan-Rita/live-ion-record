@@ -12,6 +12,7 @@ import {
   Query,
   NotFoundException,
 } from '@nestjs/common';
+import * as path from 'path';
 import { RecordService } from './record.service';
 import { UpdateRecordDto } from './dto/update-record.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -51,8 +52,9 @@ export class RecordController {
 
   @Post('complete')
   async completeUpload(
-    @Body('filename') filename: string, 
+    @Body('filename') filename: string,
     @Body('token') token: string,
+    @Body('duration') durationRaw: string,
     @Req() request: AuthenticatedRequest
   ) {
     const user = request.user;
@@ -62,16 +64,30 @@ export class RecordController {
       const record = await this.recordService.findOne(token, user.id);
 
       if (record) {
-        await this.recordService.update(record.id, {
-          filePath: result.path,
-        });
+        const duration = durationRaw ? parseFloat(durationRaw) : null;
+        await this.recordService.update(record.id, { filePath: result.path, duration });
+
+        const videoFullPath = path.join(
+          this.storageService.storageLocal.disk,
+          'videosRaw',
+          result.path,
+        );
+
+        this.storageService
+          .processVideo(videoFullPath)
+          .then(({ thumbnailPath }) =>
+            this.recordService.update(record.id, { thumbnailPath }),
+          )
+          .catch((err) =>
+            console.error(`[processVideo] failed for record ${record.id}:`, err),
+          );
 
         return { success: true, message: 'Record uploaded successfully' };
       }
-      
+
       return { success: false, message: 'Failed to upload record' };
     }
-    
+
     return { success: false, message: 'Failed to upload record' };
   }
 
@@ -79,10 +95,13 @@ export class RecordController {
   async listRecords(@Req() request: AuthenticatedRequest, @Query('name') name?: string) {
     const user = request.user;
     const results = await this.recordService.findAll(user.id, name);
-    
+
     return results.map(result => ({
       ...result,
       url: `${process.env.APP_URL}/uploads/videosRaw/${result.filePath}`,
+      thumbnailUrl: result.thumbnailPath
+        ? `${process.env.APP_URL}/uploads/thumbnails/${result.thumbnailPath}`
+        : null,
     }));
   }
 
@@ -96,6 +115,9 @@ export class RecordController {
     return {
       ...result,
       url: `${process.env.APP_URL}/uploads/videosRaw/${result.filePath}`,
+      thumbnailUrl: result.thumbnailPath
+        ? `${process.env.APP_URL}/uploads/thumbnails/${result.thumbnailPath}`
+        : null,
     };
   }
 }

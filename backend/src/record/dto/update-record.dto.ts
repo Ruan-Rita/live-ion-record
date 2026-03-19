@@ -1,4 +1,19 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateRecordDto } from './create-record.dto';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class UpdateRecordDto extends PartialType(CreateRecordDto) {}
+export class UpdateRecordDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  filePath?: string;
+
+  @IsOptional()
+  @IsString()
+  thumbnailPath?: string;
+
+  @IsOptional()
+  @IsNumber()
+  duration?: number;
+}
