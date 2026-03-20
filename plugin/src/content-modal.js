@@ -1,31 +1,30 @@
 (function () {
 if (document.getElementById('ion-start-modal')) return;
 
-const ION_API_DOMAIN = 'http://localhost:3001';
+const FREE_RECORDING_LIMIT = 5;
 
 let ionMediaRecorder = null;
-let ionChunkIndex = 0;
-const ionPendingUploads = [];
-const ionUuid = crypto.randomUUID();
 
 // Shared timing state between overlay and recording
 let ionRecordingStartTime = 0;
-let ionPausedMs = 0;       // total ms spent paused
-let ionPauseStartTime = 0; // timestamp when current pause began
+let ionPausedMs = 0;
+let ionPauseStartTime = 0;
 
-async function ionUploadChunk(formData, token) {
-    try {
-        const response = await fetch(`${ION_API_DOMAIN}/record/upload-chunks`, {
-            method: 'POST',
-            body: formData,
-            headers: { "Authorization": `Bearer ${token}` },
+function ionGetRecordings() {
+    return new Promise(resolve => {
+        chrome.storage.local.get('ion_recordings', result => {
+            resolve(result.ion_recordings || []);
         });
-        if (!response.ok) {
-            console.error('[Ion] Falha no upload do chunk', await response.text());
-        }
-    } catch (err) {
-        console.error('[Ion] Erro no envio do chunk:', err);
-    }
+    });
+}
+
+function ionSaveRecording(metadata) {
+    return new Promise(resolve => {
+        ionGetRecordings().then(recordings => {
+            recordings.push(metadata);
+            chrome.storage.local.set({ ion_recordings: recordings }, resolve);
+        });
+    });
 }
 
 function ionInjectRecordingOverlay() {
@@ -83,7 +82,6 @@ function ionInjectRecordingOverlay() {
             ? `${m}:${String(s).padStart(2, '0')}.${String(cs).padStart(2, '0')}`
             : `${m}:${String(s).padStart(2, '0')}`;
 
-        // Only touch the DOM when the displayed value actually changes
         if (text !== lastText) {
             lastText = text;
             const el = document.getElementById('ion-timer');
@@ -91,7 +89,6 @@ function ionInjectRecordingOverlay() {
         }
     }
 
-    // 100ms interval: smooth enough for centiseconds, no flickering for seconds
     const timerInterval = setInterval(updateTimer, 100);
 
     document.getElementById('ion-timer').addEventListener('click', () => {
@@ -134,54 +131,51 @@ function ionInjectRecordingOverlay() {
     });
 }
 
-async function ionStartRecording() {
+async function ionStartRecording(fileName) {
+    // Ask where to save BEFORE starting — so chunks go straight to disk
+    let writableStream;
+    let bytesWritten = 0;
+
+    try {
+        const fileHandle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [{ description: 'WebM Video', accept: { 'video/webm': ['.webm'] } }],
+        });
+        writableStream = await fileHandle.createWritable();
+    } catch {
+        // User cancelled the save dialog
+        return;
+    }
+
     try {
         const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
 
         ionInjectRecordingOverlay();
-
         ionRecordingStartTime = Date.now();
+        ionPausedMs = 0;
 
         ionMediaRecorder = new MediaRecorder(stream, {
             mimeType: 'video/webm; codecs=vp9',
             videoBitsPerSecond: 2500000,
         });
 
-        ionMediaRecorder.ondataavailable = (event) => {
+        ionMediaRecorder.ondataavailable = async (event) => {
             if (event.data.size > 0) {
-                const formData = new FormData();
-                formData.append('chunk', event.data);
-                formData.append('index', ionChunkIndex++);
-                formData.append('token', ionUuid);
-                formData.append('filename', 'video.webm');
-
-                const p = new Promise((resolve) => {
-                    chrome.storage.local.get("ion_token", async (result) => {
-                        await ionUploadChunk(formData, result.ion_token);
-                        resolve();
-                    });
-                });
-                ionPendingUploads.push(p);
+                bytesWritten += event.data.size;
+                await writableStream.write(event.data);
             }
         };
 
         ionMediaRecorder.onstop = async () => {
             stream.getTracks().forEach(t => t.stop());
-            await Promise.all(ionPendingUploads);
+            await writableStream.close();
 
-            // Duration calculated client-side: exact, no ffprobe needed
             const duration = Math.round((Date.now() - ionRecordingStartTime - ionPausedMs) / 10) / 100;
-
-            chrome.storage.local.get("ion_token", async (result) => {
-                try {
-                    await fetch(`${ION_API_DOMAIN}/record/complete`, {
-                        method: 'POST',
-                        body: JSON.stringify({ filename: 'video.webm', token: ionUuid, duration }),
-                        headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${result.ion_token}` },
-                    });
-                } catch (err) {
-                    console.error('[Ion] Erro ao chamar /complete:', err);
-                }
+            await ionSaveRecording({
+                name: fileName,
+                date: new Date().toISOString(),
+                duration,
+                size: bytesWritten,
             });
         };
 
@@ -194,11 +188,16 @@ async function ionStartRecording() {
         });
 
     } catch (err) {
+        await writableStream.abort();
         console.error('[Ion] Erro ao capturar a tela:', err);
     }
 }
 
-function injectStartModal() {
+async function injectStartModal() {
+    const recordings = await ionGetRecordings();
+    const atLimit = recordings.length >= FREE_RECORDING_LIMIT;
+    const fileName = `ion-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.webm`;
+
     const overlay = document.createElement('div');
     overlay.id = 'ion-start-modal';
     overlay.style.cssText = `
@@ -212,11 +211,21 @@ function injectStartModal() {
         font-family: Arial, sans-serif;
     `;
 
+    const limitBanner = atLimit ? `
+        <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#856404;">
+            Você atingiu o limite de ${FREE_RECORDING_LIMIT} gravações do plano Free.
+            <a href="http://localhost:3000/pricing" target="_blank" style="color:#7c24d9;font-weight:600;text-decoration:none;">Fazer upgrade →</a>
+        </div>
+    ` : `
+        <p style="margin:0 0 4px;font-size:12px;color:#94a3b8;text-align:right;">${recordings.length}/${FREE_RECORDING_LIMIT} gravações usadas</p>
+    `;
+
     overlay.innerHTML = `
         <div style="background:#fff;border-radius:12px;padding:24px;width:320px;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;">
             <button id="ion-close-modal" style="position:absolute;top:12px;right:12px;background:none;border:none;cursor:pointer;font-size:18px;color:#666;line-height:1;padding:4px;">✕</button>
             <h2 style="margin:0 0 4px;font-size:18px;font-weight:600;color:#111;">New Recording</h2>
             <p style="margin:0 0 16px;font-size:13px;color:#666;">Configure your recording settings.</p>
+            ${limitBanner}
             <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
                 <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#f1f5f9;border-radius:999px;color:#334155;font-weight:500;font-size:14px;">
                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
@@ -231,7 +240,7 @@ function injectStartModal() {
                     No Microphone
                 </div>
             </div>
-            <button id="ion-start-recording" style="width:100%;padding:12px;background:linear-gradient(90deg,#7c24d9,#4a03b8);color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:Arial,sans-serif;">
+            <button id="ion-start-recording" ${atLimit ? 'disabled' : ''} style="width:100%;padding:12px;background:${atLimit ? '#e2e8f0' : 'linear-gradient(90deg,#7c24d9,#4a03b8)'};color:${atLimit ? '#94a3b8' : 'white'};border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:${atLimit ? 'not-allowed' : 'pointer'};font-family:Arial,sans-serif;">
                 Start Recording
             </button>
         </div>
@@ -242,10 +251,12 @@ function injectStartModal() {
     document.getElementById('ion-close-modal').addEventListener('click', () => overlay.remove());
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
-    document.getElementById('ion-start-recording').addEventListener('click', () => {
-        overlay.remove();
-        ionStartRecording();
-    });
+    if (!atLimit) {
+        document.getElementById('ion-start-recording').addEventListener('click', () => {
+            overlay.remove();
+            ionStartRecording(fileName);
+        });
+    }
 }
 
 injectStartModal();

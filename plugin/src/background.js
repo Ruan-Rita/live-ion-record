@@ -25,18 +25,9 @@ function openPinnedTab(sendResponse) {
  * Listeners
  */
 chrome.action.onClicked.addListener((tab) => {
-    chrome.storage.local.get("ion_token", (result) => {
-        const token = result.ion_token;
-
-        if (token && !isTokenExpired(token)) {
-            chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                files: ['src/content-modal.js']
-            });
-        } else {
-            pendingRecordingStart = true;
-            chrome.tabs.create({ url: 'http://localhost:3000/plugin', active: true });
-        }
+    chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['src/content-modal.js']
     });
 });
 

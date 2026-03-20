@@ -43,33 +43,36 @@ Sem compressão. Sem espera. Sem cloud obrigatória.
 
 **Features:**
 - ✅ Grava tela em qualidade máxima
-- ✅ Formato nativo (WebM/MP4)
-- ✅ Download instantâneo (.webm bruto)
-- ✅ Sem limite de tempo
+- ✅ Formato nativo (WebM)
+- ✅ Salva direto no disco (File System Access API)
+- ✅ Sem limite de tempo por gravação
 - ✅ Sem marca d'água
-- ✅ Sem conta necessária
-- ✅ Armazena local (browser/disco)
+- ✅ Conta obrigatória (acesso à plataforma)
+- ✅ Até 5 gravações salvas no app
+- ✅ Vídeo fica no PC do usuário (sem upload)
 
 **Limitações:**
-- ⚠️ Só você tem o arquivo
-- ⚠️ Sem compartilhamento (só download)
+- ⚠️ Só funciona no PC onde gravou
+- ⚠️ Sem compartilhamento
 - ⚠️ Sem cloud backup
+- ⚠️ Máximo 5 gravações no histórico
 
-**Pitch:** *"Quer só gravar e baixar? Use de graça. Pra sempre."*
+**Pitch:** *"Grave, salve no seu PC e assista pela plataforma. Grátis pra sempre."*
 
 ---
 
 ### PRO (Conveniências) 💰 R$15/mês
 
 **Tudo do FREE +**
-- ✅ Upload opcional pro CDN
+- ✅ Upload pro CDN (vídeo sai do seu PC)
 - ✅ Link compartilhável (ion.app/v/abc)
 - ✅ Player online simples
 - ✅ Armazenamento cloud (10GB)
-- ✅ Histórico de gravações
+- ✅ Histórico ilimitado de gravações
 - ✅ Share direto (WhatsApp/Slack/Email)
+- ✅ Acesso de qualquer dispositivo
 
-**Ainda RAW/sem encoding!**  
+**Ainda RAW/sem encoding!**
 Só adiciona conveniência de compartilhar.
 
 ---
@@ -225,12 +228,14 @@ Freelancers = adoram isso
 | Feature | Loom Free | OBS | **Ion Free** | Ion Pro |
 |---------|-----------|-----|--------------|---------|
 | **Setup** | Fácil | Difícil | **Super fácil** | Fácil |
-| **Qualidade** | Compressed | RAW | **RAW** | RAW ou HD |
+| **Qualidade** | Compressed | RAW | **RAW** | RAW |
 | **Velocidade** | Lento | Médio | **Instantâneo** | Rápido |
 | **Limite tempo** | 5min | ∞ | **∞** | ∞ |
 | **Download** | Pago | ✅ | **✅** | ✅ |
 | **Share fácil** | ✅ | ❌ | ❌ | **✅** |
+| **Cloud storage** | ✅ | ❌ | ❌ | **10GB** |
 | **Privacidade** | Baixa | Alta | **Altíssima** | Alta |
+| **Histórico** | Limitado | ❌ | **5 gravações** | Ilimitado |
 | **Preço** | Grátis | Grátis | **Grátis** | R$15/mês |
 
 **Você é mais fácil que OBS + mais privado que Loom!** 🎯
